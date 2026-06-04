@@ -1,4 +1,4 @@
-const BASE_URL = "https://backend-lts0.onrender.com/api"
+const BASE_URL = "http://127.0.0.1:8000/api"
 
 // =====================================================
 // 🔐 LOGIN
@@ -175,68 +175,97 @@ return response
 // 📋 ORDERS
 // =====================================================
 
-export async function getOrders() {
-const response = await fetch(
-`${BASE_URL}/orders/`
-)
+// =====================================================
+// 📋 ORDERS API (FIXED)
+// =====================================================
 
-return response.json()
+export async function getOrders() {
+  return request(`${BASE_URL}/orders/`)
 }
 
 export async function createOrder(data) {
-const response = await fetch(
-`${BASE_URL}/orders/`,
-{
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-},
-body: JSON.stringify(data),
-}
-)
+  const response = await fetch(`${BASE_URL}/orders/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
 
-return response.json()
+  const text = await response.text()
+
+  let parsed
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    parsed = text
+  }
+
+  if (!response.ok) {
+    console.log("❌ STATUS:", response.status)
+    console.log("❌ RAW RESPONSE:", text)
+    console.log("❌ PARSED RESPONSE:", parsed)
+
+    throw parsed
+  }
+
+  return parsed
 }
 
 export async function updateOrder(id, data) {
-const response = await fetch(
-`${BASE_URL}/orders/${id}/`,
-{
-method: "PUT",
-headers: {
-"Content-Type": "application/json",
-},
-body: JSON.stringify(data),
-}
-)
-
-return response.json()
+  return request(`${BASE_URL}/orders/${id}/`, {
+    method: "PUT",
+    body: data,
+  })
 }
 
 export async function deleteOrder(id) {
-const response = await fetch(
-`${BASE_URL}/orders/${id}/`,
-{
-method: "DELETE",
+  return request(`${BASE_URL}/orders/${id}/`, {
+    method: "DELETE",
+  })
 }
-)
-
-return response
-}
-
-// =====================================================
-// 🚫 CANCEL ORDER
-// =====================================================
 
 export async function cancelOrder(id) {
-const response = await fetch(
-`${BASE_URL}/orders/${id}/cancel_order/`,
-{
-method: "POST",
+  return request(`${BASE_URL}/orders/${id}/cancel_order/`, {
+    method: "POST",
+  })
 }
-)
 
-return response.json()
+// =====================================================
+// 🔥 IMPORTANT FETCH WRAPPER (THIS FIXES YOUR 400 ISSUE VISIBILITY)
+// =====================================================
+async function request(url, options = {}) {
+  const response = await fetch(url, {
+    method: options.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  })
+
+  let data = null
+
+  try {
+    data = await response.json()
+  } catch (e) {
+    data = null
+  }
+
+  // ❌ THIS IS THE KEY FIX (YOU WERE MISSING THIS)
+  if (!response.ok) {
+    console.error("❌ ORDER API ERROR:", {
+      url,
+      status: response.status,
+      error: data,
+    })
+
+    throw {
+      status: response.status,
+      error: data,
+    }
+  }
+
+  return data
 }
 
 

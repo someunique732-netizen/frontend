@@ -59,68 +59,50 @@ export default function LoginPage() {
   // =====================================================
 
   async function handleSubmit(e) {
+  e.preventDefault()
 
-    e.preventDefault()
+  setLoading(true)
+  setMessage("")
 
-    setLoading(true)
+  try {
+    // ✅ CALL API FIRST
+    const data = await loginUser(formData)
 
-    setMessage("")
+    console.log("LOGIN RESPONSE:", data)
 
-    try {
+    // =================================================
+    // SUCCESS
+    // =================================================
+    if (data.access) {
+      localStorage.setItem("token", data.access)
+      localStorage.setItem("refresh", data.refresh)
+      localStorage.setItem("username", formData.username)
 
-      const data = await loginUser(formData)
+      setMessageType("success")
+      setMessage("Login Successful")
 
-      // =====================================================
-      // SUCCESS
-      // =====================================================
-
-      if (data.success) {
-
-        localStorage.setItem(
-          "token",
-          data.token
-        )
-
-        localStorage.setItem(
-          "username",
-          formData.username
-        )
-
-        setTimeout(() => {
-
-          navigate("/dashboard")
-
-        }, 1200)
-
-      }
-
-      // =====================================================
-      // FAILED
-      // =====================================================
-
-      else {
-
-        setMessageType("error")
-
-        setMessage(
-          data.message || "Invalid Credentials"
-        )
-
-      }
-
-    } catch (error) {
-
-      console.log(error)
-
-      setMessageType("error")
-
-      setMessage("Server Error")
-
+      setTimeout(() => {
+        navigate("/dashboard")
+      }, 1000)
     }
 
-    setLoading(false)
+    // =================================================
+    // FAILED
+    // =================================================
+    else {
+      setMessageType("error")
+      setMessage(data.error || "Invalid Credentials")
+    }
 
+  } catch (error) {
+    console.error(error)
+
+    setMessageType("error")
+    setMessage("Server Error")
   }
+
+  setLoading(false)
+}
 
   return (
 
