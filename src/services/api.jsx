@@ -1,4 +1,17 @@
-const BASE_URL = "https://backend-lts0.onrender.com/api"
+import axios from "axios";
+
+
+const BASE_URL = "http://127.0.0.1:8000/api";
+
+export const getDashboard = async () => {
+  const res = await axios.get(`${BASE_URL}/dashboard/`);
+  return res.data;
+};
+
+export const getMonthlyRevenue = async () => {
+  const res = await axios.get(`${BASE_URL}/dashboard/monthly/`);
+  return res.data;
+};
 
 // =====================================================
 // 🔐 LOGIN
@@ -77,19 +90,16 @@ const response = await fetch(
 return response.json()
 }
 
-export async function createItem(data) {
-const response = await fetch(
-`${BASE_URL}/items/`,
-{
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-},
-body: JSON.stringify(data),
-}
-)
+export async function createItem(formData) {
+  const response = await fetch(
+    `${BASE_URL}/items/`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  )
 
-return response.json()
+  return response.json()
 }
 
 export async function updateItem(id, data) {
@@ -274,4 +284,27 @@ export function downloadHashtagReport() {
     `${BASE_URL}/reports/hastag/`,
     "_blank"
   )
+}
+
+export async function getCategories() {
+  const response = await fetch(
+    `${BASE_URL}/categories/`
+  )
+
+  return response.json()
+}
+
+export async function createVariant(data) {
+  const response = await fetch(
+    `${BASE_URL}/variants/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  )
+
+  return response.json()
 }

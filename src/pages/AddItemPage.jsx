@@ -1,246 +1,546 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { createItem, getCategories } from "../services/api"
 
-const BASE_URL = "http://192.168.18.42:8000/api"
-
-export default function AddItemPage() {
+export default function CreateItemPage() {
 
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(false)
 
+  const [categories, setCategories] = useState([])
+
+  const [preview, setPreview] = useState(null)
+
   const [formData, setFormData] = useState({
-
-    sku: "",
-
     item_name: "",
+    category_id: "",
 
-    price: "",
+    image: null,
 
-    stock: "",
+    cost_price: "",
+    selling_price: "",
+    market_price: "",
+
+    variants: [
+      {
+        size: "",
+        design: "",
+        sku: "",
+        barcode: "",
+        stock: "",
+        minimum_stock: 5,
+      },
+    ],
   })
 
-  // =====================================================
-  // HANDLE INPUT
-  // =====================================================
+  // ==========================================
+  // LOAD CATEGORIES
+  // ==========================================
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  async function loadCategories() {
+    try {
+      const data = await getCategories()
+      setCategories(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // ==========================================
+  // PRODUCT FIELDS
+  // ==========================================
 
   function handleChange(e) {
-
     const { name, value } = e.target
 
-    setFormData({
-
-      ...formData,
-
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
+    }))
+  }
+
+  // ==========================================
+  // IMAGE
+  // ==========================================
+
+  function handleImage(e) {
+    const file = e.target.files[0]
+
+    if (!file) return
+
+    setFormData((prev) => ({
+      ...prev,
+      image: file,
+    }))
+
+    setPreview(URL.createObjectURL(file))
+  }
+
+  // ==========================================
+  // VARIANT CHANGE
+  // ==========================================
+
+  function handleVariantChange(
+    index,
+    field,
+    value
+  ) {
+    const updated = [...formData.variants]
+
+    updated[index][field] = value
+
+    setFormData({
+      ...formData,
+      variants: updated,
     })
   }
 
-  // =====================================================
-  // SUBMIT
-  // =====================================================
+  // ==========================================
+  // ADD VARIANT
+  // ==========================================
 
-  async function handleSubmit(e) {
-
-    e.preventDefault()
-
-    setLoading(true)
-
-    try {
-
-      const response = await fetch(
-        `${BASE_URL}/items/create/`,
+  function addVariant() {
+    setFormData({
+      ...formData,
+      variants: [
+        ...formData.variants,
         {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(formData),
-        }
-      )
-
-      if (response.ok) {
-
-        alert("Item Added Successfully")
-
-        navigate("/stock")
-
-      } else {
-
-        alert("Failed To Add Item")
-
-      }
-
-    } catch (error) {
-
-      console.log(error)
-
-      alert("Something Went Wrong")
-
-    } finally {
-
-      setLoading(false)
-
-    }
-
+          size: "",
+          design: "",
+          sku: "",
+          barcode: "",
+          stock: "",
+          minimum_stock: 5,
+        },
+      ],
+    })
   }
 
+  // ==========================================
+  // REMOVE VARIANT
+  // ==========================================
+
+  function removeVariant(index) {
+    if (formData.variants.length === 1) return
+
+    setFormData({
+      ...formData,
+      variants: formData.variants.filter(
+        (_, i) => i !== index
+      ),
+    })
+  }
+
+  // ==========================================
+  // TOTAL STOCK
+  // ==========================================
+
+  const totalStock = formData.variants.reduce(
+    (total, item) =>
+      total + Number(item.stock || 0),
+    0
+  )
+
+  // ==========================================
+  // SUBMIT
+  // ==========================================
+
+  async function handleSubmit(e) {
+  e.preventDefault()
+
+  setLoading(true)
+
+  try {
+
+    const fd = new FormData()
+
+    fd.append("item_name", formData.item_name)
+    fd.append("category_id", formData.category_id)
+    fd.append("cost_price", formData.cost_price)
+    fd.append("selling_price", formData.selling_price)
+    fd.append("market_price", formData.market_price)
+
+    if (formData.image) {
+      fd.append("image", formData.image)
+    }
+
+    fd.append(
+      "variants",
+      JSON.stringify(formData.variants)
+    )
+
+    const res = await createItem(fd)
+
+    setMessage("Product created successfully")
+
+    setTimeout(() => {
+      navigate("/stock")
+    }, 1000)
+
+  } catch (error) {
+    console.log(error)
+    setError("Failed to create product")
+  } finally {
+    setLoading(false)
+  }
+}
   return (
+    <div className="min-h-screen bg-black text-white p-6">
 
-    <div className="min-h-screen bg-black flex items-center justify-center p-6 text-white">
-
-      {/* CARD */}
-
-      <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl p-8">
+      <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
 
         <div className="mb-8">
 
-          <p className="text-sm text-gray-400 uppercase tracking-[4px]">
-
-            Inventory Panel
-
+          <p className="text-gray-500 uppercase tracking-[4px] text-sm">
+            Inventory Management
           </p>
 
           <h1 className="text-4xl font-black mt-2">
-
-            Add New Item
-
+            Add Product
           </h1>
 
         </div>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
-          className="space-y-6"
+          className="space-y-8"
         >
 
-          {/* SKU */}
+          {/* TOP SECTION */}
 
-          <div>
+          <div className="grid lg:grid-cols-3 gap-6">
 
-            <label className="block mb-2 text-gray-300">
+            {/* IMAGE */}
 
-              SKU
+            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
 
-            </label>
+              <h2 className="font-bold mb-4">
+                Product Image
+              </h2>
 
-            <input
-              type="text"
-              name="sku"
-              value={formData.sku}
-              onChange={handleChange}
-              required
-              placeholder="SKU001"
-              className="w-full bg-black border border-zinc-800 px-5 py-4 rounded-2xl outline-none focus:border-white transition"
-            />
+              <div className="aspect-square rounded-2xl border border-dashed border-zinc-700 flex items-center justify-center overflow-hidden">
 
-          </div>
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-gray-500">
+                    No Image
+                  </span>
+                )}
 
-          {/* PRODUCT NAME */}
-
-          <div>
-
-            <label className="block mb-2 text-gray-300">
-
-              Product Name
-
-            </label>
-
-            <input
-              type="text"
-              name="item_name"
-              value={formData.item_name}
-              onChange={handleChange}
-              required
-              placeholder="Enter product name"
-              className="w-full bg-black border border-zinc-800 px-5 py-4 rounded-2xl outline-none focus:border-white transition"
-            />
-
-          </div>
-
-          {/* PRICE + STOCK */}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-            {/* PRICE */}
-
-            <div>
-
-              <label className="block mb-2 text-gray-300">
-
-                Price
-
-              </label>
+              </div>
 
               <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                placeholder="0"
-                className="w-full bg-black border border-zinc-800 px-5 py-4 rounded-2xl outline-none focus:border-white transition"
+                type="file"
+                accept="image/*"
+                onChange={handleImage}
+                className="mt-4 w-full"
               />
 
             </div>
 
-            {/* STOCK */}
+            {/* PRODUCT INFO */}
 
-            <div>
+            <div className="lg:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
 
-              <label className="block mb-2 text-gray-300">
+              <div className="grid md:grid-cols-2 gap-5">
 
-                Stock
+                <div>
 
-              </label>
+                  <label className="block mb-2 text-gray-300">
+                    Product Name
+                  </label>
 
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                required
-                placeholder="0"
-                className="w-full bg-black border border-zinc-800 px-5 py-4 rounded-2xl outline-none focus:border-white transition"
-              />
+                  <input
+                    type="text"
+                    name="item_name"
+                    value={formData.item_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="block mb-2 text-gray-300">
+                    Category
+                  </label>
+
+                  <select
+                    name="category_id"
+                    value={formData.category_id}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                  >
+
+                    <option value="">
+                      Select Category
+                    </option>
+
+                    {categories.map(
+                      (category) => (
+                        <option
+                          key={category.id}
+                          value={category.id}
+                        >
+                          {category.category_name}
+                        </option>
+                      )
+                    )}
+
+                  </select>
+
+                </div>
+
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-5 mt-5">
+
+                <div>
+
+                  <label className="block mb-2">
+                    Cost Price
+                  </label>
+
+                  <input
+                    type="number"
+                    name="cost_price"
+                    value={formData.cost_price}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="block mb-2">
+                    Selling Price
+                  </label>
+
+                  <input
+                    type="number"
+                    name="selling_price"
+                    value={formData.selling_price}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="block mb-2">
+                    Market Price
+                  </label>
+
+                  <input
+                    type="number"
+                    name="market_price"
+                    value={formData.market_price}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                  />
+
+                </div>
+
+              </div>
 
             </div>
 
           </div>
 
-          {/* BUTTONS */}
+          {/* VARIANTS */}
 
-          <div className="flex gap-4 pt-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
 
-            <button
-              type="button"
-              onClick={() => navigate("/stock")}
-              className="flex-1 bg-zinc-900 border border-zinc-800 py-4 rounded-2xl font-semibold hover:bg-zinc-800 transition"
-            >
+            <div className="flex justify-between items-center mb-5">
 
-              Cancel
+              <h2 className="text-xl font-bold">
+                Product Variants
+              </h2>
 
-            </button>
+              <button
+                type="button"
+                onClick={addVariant}
+                className="bg-white text-black px-4 py-2 rounded-xl font-semibold"
+              >
+                + Add Variant
+              </button>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-white text-black py-4 rounded-2xl font-black hover:scale-[1.02] transition"
-            >
+            </div>
 
-              {
-                loading
-                  ? "Adding..."
-                  : "Add Item"
-              }
+            <div className="space-y-4">
 
-            </button>
+              {formData.variants.map(
+                (variant, index) => (
+
+                  <div
+                    key={index}
+                    className="grid lg:grid-cols-7 gap-3 border border-zinc-800 rounded-2xl p-4"
+                  >
+
+                    <input
+                      placeholder="Size"
+                      value={variant.size}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          index,
+                          "size",
+                          e.target.value
+                        )
+                      }
+                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                    />
+
+                    <input
+                      placeholder="Design"
+                      value={variant.design}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          index,
+                          "design",
+                          e.target.value
+                        )
+                      }
+                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                    />
+
+                    <input
+                      placeholder="SKU"
+                      value={variant.sku}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          index,
+                          "sku",
+                          e.target.value
+                        )
+                      }
+                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                    />
+
+                    <input
+                      placeholder="Barcode"
+                      value={variant.barcode}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          index,
+                          "barcode",
+                          e.target.value
+                        )
+                      }
+                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="Stock"
+                      value={variant.stock}
+                      onChange={(e) =>
+                        handleVariantChange(
+                          index,
+                          "stock",
+                          e.target.value
+                        )
+                      }
+                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="Min Stock"
+                      value={
+                        variant.minimum_stock
+                      }
+                      onChange={(e) =>
+                        handleVariantChange(
+                          index,
+                          "minimum_stock",
+                          e.target.value
+                        )
+                      }
+                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeVariant(index)
+                      }
+                      className="bg-red-600 rounded-xl"
+                    >
+                      Remove
+                    </button>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          </div>
+
+          {/* FOOTER */}
+
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 flex justify-between items-center">
+
+            <div>
+
+              <p className="text-gray-400">
+                Variants:
+                {" "}
+                {formData.variants.length}
+              </p>
+
+              <p className="text-gray-400">
+                Total Stock:
+                {" "}
+                {totalStock}
+              </p>
+
+            </div>
+
+            <div className="flex gap-4">
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/stock")
+                }
+                className="bg-zinc-800 px-6 py-3 rounded-xl"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-white text-black px-8 py-3 rounded-xl font-bold"
+              >
+                {loading
+                  ? "Saving..."
+                  : "Save Product"}
+              </button>
+
+            </div>
 
           </div>
 
@@ -249,7 +549,5 @@ export default function AddItemPage() {
       </div>
 
     </div>
-
   )
-
 }

@@ -293,7 +293,7 @@ export default function StaffPage() {
 
                     <td className="p-5 text-gray-300">
 
-                      {member.role_display}
+                      {member.role || "N/A"}
 
                     </td>
 

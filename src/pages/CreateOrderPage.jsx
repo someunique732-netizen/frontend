@@ -176,8 +176,8 @@ export default function CreateOrderPage() {
           item: item.id,
           item_name: item.item_name,
           quantity: 1,
-          price: item.price,
-          stock: item.stock
+          price: Number(item.selling_price),
+          stock: item.total_stock 
         }
       ]
     })
@@ -376,11 +376,11 @@ export default function CreateOrderPage() {
 
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-stretch min-h-[calc(100vh-160px)]">
 
           {/* LEFT */}
 
-          <div className="xl:col-span-2 space-y-8">
+          <div className="xl:col-span-2 flex flex-col gap-8 h-full">
 
             {/* CUSTOMER */}
 
@@ -523,7 +523,7 @@ export default function CreateOrderPage() {
 
             {/* ITEMS */}
 
-            <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-[35px] p-8">
+            <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-[35px] p-8 flex-1">
 
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-8">
 
@@ -565,7 +565,7 @@ export default function CreateOrderPage() {
 
                         <p className="text-gray-400 text-sm mt-1">
 
-                          Stock: {item.stock}
+                          Stock: {item.total_stock}
 
                         </p>
 
@@ -606,11 +606,11 @@ export default function CreateOrderPage() {
 
           {/* RIGHT */}
 
-          <div className="space-y-8">
+          <div className="flex flex-col h-full">
 
             {/* ORDER ITEMS */}
 
-            <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-[35px] p-8 sticky top-6">
+            <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-[35px] p-8 flex flex-col h-full">
 
               <h2 className="text-3xl font-black mb-8">
 
@@ -618,8 +618,7 @@ export default function CreateOrderPage() {
 
               </h2>
 
-              <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
-
+              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                 {formData.items.length === 0 && (
 
                   <div className="text-center text-gray-500 py-10">
@@ -695,7 +694,7 @@ export default function CreateOrderPage() {
 
               {/* TOTALS */}
 
-              <div className="mt-8 space-y-5">
+              <div className="mt-auto space-y-5 pt-6 border-t border-white/10">
 
                 <div>
 

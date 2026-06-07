@@ -9,13 +9,16 @@ import {
   deleteOrder
 } from "../services/api"
 
+import DeleteConfirmBox from "../components/DeleteConfirmBox"
+
+
 export default function OrderPage() {
+
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
   const [orders, setOrders] = useState([])
-
-  const [loading, setLoading] = useState(true)
 
   const [search, setSearch] = useState("")
 
@@ -64,24 +67,23 @@ export default function OrderPage() {
   // =====================================================
 
   async function confirmDelete() {
+  try {
+    setLoading(true)
 
-    try {
+    await deleteOrder(deleteOrderId)
 
-      await deleteOrder(deleteOrderId)
+    setOrders((prev) =>
+      prev.filter((o) => o.id !== deleteOrderId)
+    )
 
-      setOrders((prev) =>
-        prev.filter(
-          (o) => o.id !== deleteOrderId
-        )
-      )
+    setDeleteOrderId(null)
 
-      setDeleteOrderId(null)
-
-    } catch (error) {
-
-      console.log(error)
-    }
+  } catch (error) {
+    console.log(error)
+  } finally {
+    setLoading(false)
   }
+}
 
   // =====================================================
   // FILTERED ORDERS
@@ -749,63 +751,14 @@ export default function OrderPage() {
       {/* DELETE MODAL */}
       {/* ===================================================== */}
 
-      {deleteOrderId && (
-
-        <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-          onClick={() =>
-            setDeleteOrderId(null)
-          }
-        >
-
-          <div
-            className="bg-zinc-950 border border-zinc-800 rounded-[35px] p-8 w-[90%] max-w-md"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-
-            <h2 className="text-2xl font-black mb-3">
-
-              Delete Order?
-
-            </h2>
-
-            <p className="text-gray-400 mb-6">
-
-              This action cannot be undone.
-
-            </p>
-
-            <div className="flex justify-end gap-4">
-
-              <button
-                onClick={() =>
-                  setDeleteOrderId(null)
-                }
-                className="bg-zinc-800 px-5 py-3 rounded-2xl"
-              >
-
-                Cancel
-
-              </button>
-
-              <button
-                onClick={confirmDelete}
-                className="bg-red-500 px-5 py-3 rounded-2xl"
-              >
-
-                Delete
-
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
+     {/* DELETE BOX COMPONENT (NO UI CHANGE) */}
+{deleteOrderId && (
+  <DeleteConfirmBox
+    onCancel={() => setDeleteOrderId(null)}
+    onConfirm={confirmDelete}
+    loading={loading}
+  />
+)}
 
     </div>
   )

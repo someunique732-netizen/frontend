@@ -1,307 +1,172 @@
-import { useEffect, useState } from "react"
-
-import { getCustomers } from "../services/api"
+import { useEffect, useState } from "react";
+import { getCustomers } from "../services/api";
 
 export default function CustomerPage() {
-
-  const [customers, setCustomers] = useState([])
-
-  const [loading, setLoading] = useState(true)
-
-  const [search, setSearch] = useState("")
-
-  // =====================================================
-  // LOAD CUSTOMERS
-  // =====================================================
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-
-    fetchCustomers()
-
-  }, [])
+    fetchCustomers();
+  }, []);
 
   async function fetchCustomers() {
-
     try {
-
-      const data = await getCustomers()
-
-      setCustomers(data)
-
+      const data = await getCustomers();
+      setCustomers(data);
     } catch (error) {
-
-      console.log(error)
-
+      console.log(error);
     } finally {
-
-      setLoading(false)
-
+      setLoading(false);
     }
-
   }
 
-  // =====================================================
-  // FILTER
-  // =====================================================
-
   const filteredCustomers = customers.filter((customer) =>
+    customer.customer_name?.toLowerCase().includes(search.toLowerCase())
+  );
 
-    customer.customer_name
-      ?.toLowerCase()
-      .includes(search.toLowerCase())
-
-  )
-
-  // =====================================================
-  // STATS
-  // =====================================================
-
-  const totalCustomers = customers.length
+  const totalCustomers = customers.length;
 
   const activeCustomers = customers.filter(
-    (customer) => customer.status === "Active"
-  ).length
+    (c) => c.status === "Active"
+  ).length;
 
   const pendingCustomers = customers.filter(
-    (customer) => customer.status === "Pending"
-  ).length
+    (c) => c.status === "Pending"
+  ).length;
 
   return (
+    <div className="min-h-screen bg-[#0B1220] text-white p-6">
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white p-8">
-
-      {/* ===================================================== */}
       {/* HEADER */}
-      {/* ===================================================== */}
-
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
 
         <div>
-
-          <h1 className="text-5xl font-bold">
-            Customers
-          </h1>
-
-          <p className="text-gray-400 mt-3 text-lg">
-            Manage all customer details
+          <h1 className="text-3xl font-bold">Customers</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Manage customer records
           </p>
-
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-3">
 
           <input
             type="text"
-            placeholder="Search customer..."
+            placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white/10 border border-white/10 px-5 py-4 rounded-2xl outline-none w-72 backdrop-blur-xl"
+            className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-sm w-64 outline-none focus:border-purple-500"
           />
 
-          <button className="bg-white text-black px-6 py-4 rounded-2xl font-semibold hover:scale-105 transition">
-
-            Add Customer
-
+          <button className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-xl text-sm font-medium transition">
+            Add
           </button>
 
         </div>
-
       </div>
 
-      {/* ===================================================== */}
       {/* STATS */}
-      {/* ===================================================== */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6">
-
-          <p className="text-gray-400">
-            Total Customers
-          </p>
-
-          <h2 className="text-4xl font-bold mt-4">
-            {totalCustomers}
-          </h2>
-
-        </div>
-
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6">
-
-          <p className="text-gray-400">
-            Active Customers
-          </p>
-
-          <h2 className="text-4xl font-bold mt-4 text-green-400">
-            {activeCustomers}
-          </h2>
-
-        </div>
-
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6">
-
-          <p className="text-gray-400">
-            Pending Customers
-          </p>
-
-          <h2 className="text-4xl font-bold mt-4 text-yellow-400">
-            {pendingCustomers}
-          </h2>
-
-        </div>
+        <Stat title="Total" value={totalCustomers} />
+        <Stat title="Active" value={activeCustomers} color="text-green-400" />
+        <Stat title="Pending" value={pendingCustomers} color="text-yellow-400" />
 
       </div>
 
-      {/* ===================================================== */}
       {/* TABLE */}
-      {/* ===================================================== */}
-
-      <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 overflow-x-auto">
+      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
 
         {loading ? (
-
-          <div className="text-center py-20 text-gray-400 text-xl">
-
-            Loading Customers...
-
+          <div className="text-center py-16 text-gray-400 text-sm">
+            Loading customers...
           </div>
-
         ) : (
-
-          <table className="w-full">
+          <table className="w-full text-sm">
 
             {/* HEADER */}
-            <thead>
-
-              <tr className="border-b border-white/10 text-left">
-
-                <th className="py-5">
-                  Customer
-                </th>
-
-                <th className="py-5">
-                  Phone
-                </th>
-
-                <th className="py-5">
-                  Municipality
-                </th>
-
-                <th className="py-5">
-                  Address
-                </th>
-
-                <th className="py-5">
-                  Status
-                </th>
-
-                <th className="py-5">
-                  Actions
-                </th>
-
+            <thead className="bg-white/5 text-gray-300">
+              <tr>
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Phone</th>
+                <th className="p-3 text-left">Municipality</th>
+                <th className="p-3 text-left">Address</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Actions</th>
               </tr>
-
             </thead>
 
             {/* BODY */}
             <tbody>
-
               {filteredCustomers.map((customer) => (
-
                 <tr
                   key={customer.id}
-                  className="border-b border-white/10 hover:bg-white/5 transition"
+                  className="border-t border-white/5 hover:bg-white/5 transition"
                 >
 
-                  {/* NAME */}
-                  <td className="py-6 font-semibold">
-
+                  <td className="p-3 font-medium">
                     {customer.customer_name}
-
                   </td>
 
-                  {/* PHONE */}
-                  <td className="py-6 text-gray-300">
-
-                    {customer.phone}
-
+                  <td className="p-3 text-gray-300">
+                    {customer.phone1}
                   </td>
 
-                  {/* MUNICIPALITY */}
-                  <td className="py-6 text-gray-300">
-
+                  <td className="p-3 text-gray-300">
                     {customer.municipality}
-
                   </td>
 
-                  {/* ADDRESS */}
-                  <td className="py-6 text-gray-300">
-
+                  <td className="p-3 text-gray-300">
                     {customer.address}
-
                   </td>
 
-                  {/* STATUS */}
-                  <td className="py-6">
-
-                    <span
-                      className={`px-4 py-2 rounded-xl text-sm
-
-                      ${
-                        customer.status === "Active"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-yellow-500/20 text-yellow-400"
-                      }
-                      `}
-                    >
-
+                  <td className="p-3">
+                    <span className={`text-xs px-2 py-1 rounded-md ${
+                      customer.status === "Active"
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-yellow-500/20 text-yellow-400"
+                    }`}>
                       {customer.status || "Active"}
-
                     </span>
-
                   </td>
 
-                  {/* ACTIONS */}
-                  <td className="py-6">
+                  <td className="p-3">
+                    <div className="flex gap-2">
 
-                    <div className="flex gap-3">
-
-                      <button className="px-4 py-2 rounded-xl bg-blue-500 hover:opacity-90 transition">
-
+                      <button className="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-md hover:bg-blue-500/30">
                         View
-
                       </button>
 
-                      <button className="px-4 py-2 rounded-xl bg-orange-500 hover:opacity-90 transition">
-
+                      <button className="text-xs px-3 py-1 bg-orange-500/20 text-orange-400 rounded-md hover:bg-orange-500/30">
                         Edit
-
                       </button>
 
-                      <button className="px-4 py-2 rounded-xl bg-red-500 hover:opacity-90 transition">
-
+                      <button className="text-xs px-3 py-1 bg-red-500/20 text-red-400 rounded-md hover:bg-red-500/30">
                         Delete
-
                       </button>
 
                     </div>
-
                   </td>
 
                 </tr>
-
               ))}
-
             </tbody>
 
           </table>
-
         )}
-
       </div>
-
     </div>
+  );
+}
 
-  )
-
+/* ================= SMALL CARD ================= */
+function Stat({ title, value, color = "text-white" }) {
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+      <p className="text-gray-400 text-xs">{title}</p>
+      <h2 className={`text-2xl font-bold mt-2 ${color}`}>
+        {value}
+      </h2>
+    </div>
+  );
 }
