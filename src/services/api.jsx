@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const BASE_URL = "https://backend-lts0.onrender.com/api";
+const BASE_URL = "http://127.0.0.1:8000/api";
 
 export const getDashboard = async () => {
   const res = await axios.get(`${BASE_URL}/dashboard/`);
@@ -9,7 +9,7 @@ export const getDashboard = async () => {
 };
 
 export const getMonthlyRevenue = async () => {
-  const res = await axios.get(`${BASE_URL}/dashboard/monthly/`);
+  const res = await axios.get(`${BASE_URL}/monthly-revenue/`);
   return res.data;
 };
 
@@ -308,3 +308,12 @@ export async function createVariant(data) {
 
   return response.json()
 }
+
+export async function getVariants() {
+  const res = await axios.get(
+    `${BASE_URL}/variants/`
+  )
+
+  return res.data
+}
+

@@ -63,25 +63,25 @@ export default function AdminDashboard() {
 
         <Card
           title="Revenue"
-          value={`Rs. ${data?.revenue}`}
+          value={`Rs. ${data?.revenue ?? 0}`}
           color="text-green-400"
         />
 
         <Card
           title="Orders"
-          value={data?.orders}
+          value={data?.orders ?? 0}
           color="text-cyan-400"
         />
 
         <Card
           title="Customers"
-          value={data?.customers}
+          value={data?.customers ?? 0}
           color="text-purple-400"
         />
 
         <Card
           title="Profit"
-          value={`Rs. ${data?.profit}`}
+          value={`Rs. ${data?.profit ?? 0}`}
           color="text-yellow-400"
         />
       </div>
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
                   <td className="p-2">#{order.id}</td>
                   <td className="p-2">{order.customer}</td>
                   <td className="p-2 text-green-400">
-                    Rs. {order.amount}
+                    Rs. {order.amount ?? 0}
                   </td>
                   <td className="p-2">{order.date}</td>
                 </tr>
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
             <div className="flex justify-between">
               <span>Total Revenue</span>
               <span className="text-green-400">
-                Rs. {data?.revenue}
+                Rs. {data?.revenue ?? 0}
               </span>
             </div>
 

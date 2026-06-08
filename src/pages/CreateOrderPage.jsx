@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom"
 import {
   createOrder,
   getItems,
-  getCustomers
+  getCustomers,
+  getVariants,
+  createCustomer,
 } from "../services/api"
 
 export default function CreateOrderPage() {
@@ -18,7 +20,7 @@ export default function CreateOrderPage() {
 
   const [loading, setLoading] = useState(false)
 
-  const [items, setItems] = useState([])
+  const [variants, setVariants] = useState([])
 
   const [customers, setCustomers] = useState([])
 
@@ -58,25 +60,33 @@ export default function CreateOrderPage() {
 
   useEffect(() => {
 
-    fetchItems()
+    fetchVariants()
 
     fetchCustomers()
 
   }, [])
 
-  async function fetchItems() {
+  async function fetchVariants() {
+  try {
+    const items = await getItems()
 
-    try {
+    const flatVariants = items.flatMap(item =>
+      item.variants.map(v => ({
+        id: v.id,
+        item_name: item.item_name,
+        size: v.size,
+        sku: v.sku,
+        stock: v.stock,
+        price: Number(item.selling_price) // ✅ FIX HERE
+      }))
+    )
 
-      const data = await getItems()
+    setVariants(flatVariants)
 
-      setItems(data)
-
-    } catch (error) {
-
-      console.log(error)
-    }
+  } catch (error) {
+    console.log(error)
   }
+}
 
   async function fetchCustomers() {
 
@@ -156,10 +166,10 @@ export default function CreateOrderPage() {
   // ADD ITEM
   // =====================================================
 
-  function addItem(item) {
+  function addItem(variant) {
 
     const exists = formData.items.find(
-      (i) => i.item === item.id
+      (i) => i.variant === variant.id
     )
 
     if (exists) return
@@ -173,11 +183,13 @@ export default function CreateOrderPage() {
         ...formData.items,
 
         {
-          item: item.id,
-          item_name: item.item_name,
+          variant: variant.id,
+          item_name: variant.item_name,
+          size: variant.size,
+          sku: variant.sku,
           quantity: 1,
-          price: Number(item.selling_price),
-          stock: item.total_stock 
+          price: Number(variant.price),
+          stock: variant.stock
         }
       ]
     })
@@ -248,77 +260,104 @@ export default function CreateOrderPage() {
   // SUBMIT
   // =====================================================
 
-  async function handleSubmit() {
+ async function handleSubmit() {
+  try {
+    setLoading(true)
 
-    try {
+    let customerId = selectedCustomer
 
-      setLoading(true)
+    // Create customer if manual mode
+    if (!customerId) {
 
-      const payload = {
+      const customerRes =
+        await createCustomer({
+          customer_name:
+            formData.customer.customer_name,
 
-        customer: formData.customer,
+          phone1:
+            formData.customer.phone1,
 
-        delivery_charge:
-          Number(formData.delivery_charge),
+          phone2:
+            formData.customer.phone2,
 
-        paid_amount:
-          Number(formData.paid_amount),
+          municipality:
+            formData.customer.municipality,
 
-        items: formData.items.map(
-          (i) => ({
-            item: i.item,
-            quantity: i.quantity
-          })
-        )
-      }
+          address:
+            formData.customer.address,
 
-      const data =
-        await createOrder(payload)
+          remark:
+            formData.customer.remark
+        })
 
-      if (data.id) {
+      customerId = customerRes.id
+    }
 
-        setMessage(
-          "Order Created Successfully"
-        )
+    const payload = {
 
-        setTimeout(() => {
+      customer: Number(customerId),
 
-          navigate("/orders")
+      delivery_charge:
+        Number(formData.delivery_charge),
 
-        }, 1500)
+      paid_amount:
+        Number(formData.paid_amount),
 
-      } else {
+      items: formData.items.map(
+        (i) => ({
+          variant: i.variant,
+          quantity: i.quantity
+        })
+      )
+    }
 
-        setMessage(
-          "Failed To Create Order"
-        )
-      }
+    console.log(payload)
 
-    } catch (error) {
+    const data =
+      await createOrder(payload)
 
-      console.log(error)
+    if (data.id) {
 
       setMessage(
-        "Server Error"
+        "Order Created Successfully"
       )
 
-    } finally {
+      setTimeout(() => {
+        navigate("/orders")
+      }, 1500)
 
-      setLoading(false)
+    } else {
+
+      setMessage(
+        "Failed To Create Order"
+      )
     }
+
+  } catch (error) {
+
+    console.log(error)
+
+    setMessage(
+      "Server Error"
+    )
+
+  } finally {
+
+    setLoading(false)
   }
+}
 
   // =====================================================
   // FILTER ITEMS
   // =====================================================
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.item_name
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+  const filteredVariants = variants.filter(
+  v =>
+    v.item_name
+      ?.toLowerCase()
+      .includes(search.toLowerCase())
+    || v.size?.toLowerCase().includes(search.toLowerCase())
+    || v.sku?.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -546,46 +585,38 @@ export default function CreateOrderPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-h-[500px] overflow-y-auto pr-2">
 
-                {filteredItems.map((item) => (
+                {filteredVariants.map((variant) => (
 
                   <div
-                    key={item.id}
+                    key={variant.id}
                     className="bg-black/30 border border-white/10 rounded-3xl p-5 hover:border-blue-500 transition"
                   >
 
-                    <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-lg">
+                        {variant.item_name}
+                      </h3>
 
-                      <div>
-
-                        <h3 className="font-bold text-lg">
-
-                          {item.item_name}
-
-                        </h3>
-
-                        <p className="text-gray-400 text-sm mt-1">
-
-                          Stock: {item.total_stock}
-
-                        </p>
-
+                      <div className="text-sm text-gray-400">
+                        Size: {variant.size}
                       </div>
 
-                      <div className="text-right">
-
-                        <p className="text-green-400 font-black text-xl">
-
-                          Rs. {item.price}
-
-                        </p>
-
+                      <div className="text-sm text-gray-400">
+                        SKU: {variant.sku}
                       </div>
 
+                      <div className="text-sm text-gray-400">
+                        Stock: {variant.stock}
+                      </div>
                     </div>
+
+                    <p className="text-green-400 font-black text-xl">
+                      Rs. {variant.price}
+                    </p>
 
                     <button
                       onClick={() =>
-                        addItem(item)
+                        addItem(variant)
                       }
                       className="mt-5 w-full bg-gradient-to-r from-blue-500 to-purple-500 py-3 rounded-2xl font-bold hover:scale-[1.02] transition"
                     >
