@@ -6,6 +6,10 @@ export default function CreateItemPage() {
 
   const navigate = useNavigate()
 
+  const [message, setMessage] = useState("")
+  
+  const [error, setError] = useState("")
+
   const [loading, setLoading] = useState(false)
 
   const [categories, setCategories] = useState([])
@@ -173,7 +177,7 @@ export default function CreateItemPage() {
       "variants",
       JSON.stringify(formData.variants)
     )
-
+    
     const res = await createItem(fd)
 
     setMessage("Product created successfully")
@@ -424,6 +428,7 @@ export default function CreateItemPage() {
                     />
 
                     <input
+                      required
                       placeholder="SKU"
                       value={variant.sku}
                       onChange={(e) =>
@@ -437,6 +442,7 @@ export default function CreateItemPage() {
                     />
 
                     <input
+                      required
                       placeholder="Barcode"
                       value={variant.barcode}
                       onChange={(e) =>
