@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const BASE_URL = "https://backend-lts0.onrender.com/api";
+const BASE_URL = "http://192.168.1.27:8000/api";
 
 export const getDashboard = async () => {
   const res = await axios.get(`${BASE_URL}/dashboard/`);
@@ -76,6 +76,18 @@ body: JSON.stringify(data),
 )
 
 return response.json()
+}
+
+export async function deleteCustomer(id) {
+
+  const response = await fetch(
+    `${BASE_URL}/customers/${id}/`,
+    {
+      method: "DELETE",
+    }
+  )
+
+  return response
 }
 
 // =====================================================

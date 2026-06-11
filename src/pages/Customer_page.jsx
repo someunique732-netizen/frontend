@@ -1,7 +1,18 @@
-import { useEffect, useState } from "react";
-import { getCustomers } from "../services/api";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+
+import {
+  getCustomers,
+  deleteCustomer
+} from "../services/api"
+
+import DeleteConfirmBox from "../components/DeleteConfirmBox"
 
 export default function CustomerPage() {
+  const navigate = useNavigate()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -9,6 +20,52 @@ export default function CustomerPage() {
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  /// delete customer
+  async function handleDelete() {
+
+  if (!selectedCustomer) return
+
+  try {
+
+    setDeleteLoading(true)
+
+    const response = await deleteCustomer(
+      selectedCustomer.id
+    )
+
+    if (response.ok) {
+
+      setCustomers(prev =>
+        prev.filter(
+          customer =>
+            customer.id !== selectedCustomer.id
+        )
+      )
+
+      setShowDeleteModal(false)
+
+      setSelectedCustomer(null)
+
+    } else {
+
+      alert("Delete Failed")
+
+    }
+
+  } catch (error) {
+
+    console.log(error)
+
+    alert("Delete Error")
+
+  } finally {
+
+    setDeleteLoading(false)
+
+  }
+
+}
 
   async function fetchCustomers() {
     try {
@@ -58,8 +115,9 @@ export default function CustomerPage() {
             className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-sm w-64 outline-none focus:border-purple-500"
           />
 
-          <button className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-xl text-sm font-medium transition">
-            Add
+          <button
+            className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-xl text-sm font-medium transition">
+            Add Customer
           </button>
 
         </div>
@@ -133,15 +191,23 @@ export default function CustomerPage() {
                   <td className="p-3">
                     <div className="flex gap-2">
 
-                      <button className="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded-md hover:bg-blue-500/30">
+                      <button className="px-3 py-1 rounded-lg bg-blue-500 hover:opacity-90 transition text-xs">
                         View
                       </button>
 
-                      <button className="text-xs px-3 py-1 bg-orange-500/20 text-orange-400 rounded-md hover:bg-orange-500/30">
+                      <button className="px-3 py-1 rounded-lg bg-orange-500 hover:opacity-90 transition text-xs">
                         Edit
                       </button>
 
-                      <button className="text-xs px-3 py-1 bg-red-500/20 text-red-400 rounded-md hover:bg-red-500/30">
+                      <button
+                        onClick={() => {
+
+                          setSelectedCustomer(customer)
+
+                          setShowDeleteModal(true)
+
+                        }}
+                        className="px-3 py-1 rounded-lg bg-red-500 hover:opacity-90 transition text-xs">
                         Delete
                       </button>
 
@@ -155,6 +221,19 @@ export default function CustomerPage() {
           </table>
         )}
       </div>
+      {showDeleteModal && (
+        <DeleteConfirmBox
+          loading={deleteLoading}
+          onCancel={() => {
+
+            setShowDeleteModal(false)
+
+            setSelectedCustomer(null)
+
+          }}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }

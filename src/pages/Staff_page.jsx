@@ -6,9 +6,17 @@ import {
   deleteStaffApi
 } from "../services/api"
 
+import DeleteConfirmBox from "../components/DeleteConfirmBox"
+
 
 
 export default function StaffPage() {
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const [selectedStaff, setSelectedStaff] = useState(null)
+
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -48,30 +56,39 @@ export default function StaffPage() {
   // DELETE STAFF
   // =================================================
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
 
-    const confirmDelete = window.confirm(
-      "Delete this staff?"
-    )
-
-    if (!confirmDelete) return
+    if (!selectedStaff) return
 
     try {
 
-      await deleteStaffApi(id)
+      setDeleteLoading(true)
 
-      setStaff(
-        staff.filter(
-          (member) => member.id !== id
+      await deleteStaffApi(selectedStaff.id)
+
+      setStaff(prev =>
+        prev.filter(
+          member => member.id !== selectedStaff.id
         )
       )
+
+      setShowDeleteModal(false)
+
+      setSelectedStaff(null)
 
     } catch (error) {
 
       console.error(error)
-    }
-  }
 
+      alert("Failed to delete staff")
+
+    } finally {
+
+      setDeleteLoading(false)
+
+    }
+
+  }
 
 
   // =================================================
@@ -346,14 +363,16 @@ export default function StaffPage() {
                         </button>
 
                         <button
-                          onClick={() =>
-                            handleDelete(member.id)
-                          }
-                          className="px-4 py-2 rounded-xl bg-red-500"
-                        >
+                          onClick={() => {
+
+                            setSelectedStaff(member)
+
+                            setShowDeleteModal(true)
+
+                          }}
+                          className="px-4 py-2 rounded-xl bg-red-500">
 
                           Delete
-
                         </button>
 
                       </div>
@@ -373,6 +392,19 @@ export default function StaffPage() {
         </div>
 
       </div>
+      {showDeleteModal && (
+        <DeleteConfirmBox
+          loading={deleteLoading}
+          onCancel={() => {
+
+            setShowDeleteModal(false)
+
+            setSelectedStaff(null)
+
+          }}
+          onConfirm={handleDelete}
+        />
+      )}
 
     </div>
 

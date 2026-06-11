@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { getItems } from "../services/api"
-
-const BASE_URL = "http://192.168.18.42:8000/api"
+import { getItems,deleteItem} from "../services/api"
+import DeleteConfirmBox from "../components/DeleteConfirmBox"
 
 export default function StockPage() {
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const [selectedProduct, setSelectedProduct] = useState(null)
+
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -46,6 +51,56 @@ export default function StockPage() {
   }
 
   // =====================================================
+  // DELETE ITEM
+  // =====================================================
+  async function handleDelete() {
+
+    if (!selectedProduct) return
+
+    try {
+
+      setDeleteLoading(true)
+
+      const response = await deleteItem(
+        selectedProduct.id
+      )
+
+      if (response.ok) {
+
+        setProducts(prev =>
+          prev.filter(
+            item =>
+              item.id !== selectedProduct.id
+          )
+        )
+
+        setShowDeleteModal(false)
+
+        setSelectedProduct(null)
+
+      } else {
+
+        const text = await response.text()
+
+        console.log(text)
+
+        alert("Delete Failed")
+
+      }
+
+    } catch (error) {
+
+      console.log(error)
+
+      alert("Delete Error")
+
+    } finally {
+
+      setDeleteLoading(false)
+
+    }
+
+  }
   // IMPORT FILE
   // =====================================================
 
@@ -342,7 +397,7 @@ export default function StockPage() {
                       {/* PRICE */}
                       <td className="px-4 py-3">
 
-                        Rs. {product.price}
+                        Rs. {product.selling_price}
 
                       </td>
 
@@ -410,7 +465,12 @@ export default function StockPage() {
 
                           </button>
 
-                          <button className="px-3 py-1 rounded-lg bg-red-500 hover:opacity-90 transition text-xs">
+
+                          <button
+                          onClick={() => {
+                            setSelectedProduct(product)
+                            setShowDeleteModal(true)
+                          }} className="px-3 py-1 rounded-lg bg-red-500 hover:opacity-90 transition text-xs">
 
                             Delete
 
@@ -435,6 +495,19 @@ export default function StockPage() {
         )}
 
       </div>
+      {showDeleteModal && (
+        <DeleteConfirmBox
+          loading={deleteLoading}
+          onCancel={() => {
+
+            setShowDeleteModal(false)
+
+            setSelectedProduct(null)
+
+          }}
+          onConfirm={handleDelete}
+        />
+      )}
 
     </div>
 

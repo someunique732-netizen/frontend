@@ -194,212 +194,201 @@ export default function CreateItemPage() {
   }
 }
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+  <div className="min-h-screen bg-zinc-950 text-white p-6">
+    <div className="max-w-7xl mx-auto">
 
-      <div className="max-w-7xl mx-auto">
+      {/* HEADER */}
 
-        {/* HEADER */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold">
+          Add Product
+        </h1>
 
-        <div className="mb-8">
+        <p className="text-zinc-400 mt-2">
+          Create a new product and manage variants
+        </p>
+      </div>
 
-          <p className="text-gray-500 uppercase tracking-[4px] text-sm">
-            Inventory Management
-          </p>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
 
-          <h1 className="text-4xl font-black mt-2">
-            Add Product
-          </h1>
+        {/* TOP SECTION */}
 
-        </div>
+        <div className="grid lg:grid-cols-3 gap-6">
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-8"
-        >
+          {/* IMAGE */}
 
-          {/* TOP SECTION */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 
-          <div className="grid lg:grid-cols-3 gap-6">
+            <h2 className="text-lg font-semibold mb-4">
+              Product Image
+            </h2>
 
-            {/* IMAGE */}
+            <div className="aspect-square rounded-2xl overflow-hidden bg-black border border-zinc-800">
 
-            <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-
-              <h2 className="font-bold mb-4">
-                Product Image
-              </h2>
-
-              <div className="aspect-square rounded-2xl border border-dashed border-zinc-700 flex items-center justify-center overflow-hidden">
-
-                {preview ? (
-                  <img
-                    src={preview}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-gray-500">
-                    No Image
-                  </span>
-                )}
-
-              </div>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImage}
-                className="mt-4 w-full"
-              />
+              {preview ? (
+                <img
+                  src={preview}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                  No Image Selected
+                </div>
+              )}
 
             </div>
 
-            {/* PRODUCT INFO */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImage}
+              className="mt-4 w-full bg-black border border-zinc-800 rounded-xl p-3"
+            />
 
-            <div className="lg:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+          </div>
 
-              <div className="grid md:grid-cols-2 gap-5">
+          {/* PRODUCT INFO */}
 
-                <div>
+          <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 
-                  <label className="block mb-2 text-gray-300">
-                    Product Name
-                  </label>
+            <h2 className="text-lg font-semibold mb-5">
+              Product Information
+            </h2>
 
-                  <input
-                    type="text"
-                    name="item_name"
-                    value={formData.item_name}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
-                  />
+            <div className="grid md:grid-cols-2 gap-5">
 
-                </div>
+              <div>
+                <label className="block mb-2 text-zinc-400">
+                  Product Name
+                </label>
 
-                <div>
-
-                  <label className="block mb-2 text-gray-300">
-                    Category
-                  </label>
-
-                  <select
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
-                  >
-
-                    <option value="">
-                      Select Category
-                    </option>
-
-                    {categories.map(
-                      (category) => (
-                        <option
-                          key={category.id}
-                          value={category.id}
-                        >
-                          {category.category_name}
-                        </option>
-                      )
-                    )}
-
-                  </select>
-
-                </div>
-
+                <input
+                  type="text"
+                  name="item_name"
+                  value={formData.item_name}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl focus:border-white outline-none"
+                />
               </div>
 
-              <div className="grid md:grid-cols-3 gap-5 mt-5">
+              <div>
+                <label className="block mb-2 text-zinc-400">
+                  Category
+                </label>
 
-                <div>
+                <select
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl focus:border-white outline-none"
+                >
+                  <option value="">
+                    Select Category
+                  </option>
 
-                  <label className="block mb-2">
-                    Cost Price
-                  </label>
+                  {categories.map((category) => (
+                    <option
+                      key={category.id}
+                      value={category.id}
+                    >
+                      {category.category_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                  <input
-                    type="number"
-                    name="cost_price"
-                    value={formData.cost_price}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
-                  />
+            </div>
 
-                </div>
+            <div className="grid md:grid-cols-3 gap-5 mt-5">
 
-                <div>
+              <div>
+                <label className="block mb-2 text-zinc-400">
+                  Cost Price
+                </label>
 
-                  <label className="block mb-2">
-                    Selling Price
-                  </label>
+                <input
+                  type="number"
+                  name="cost_price"
+                  value={formData.cost_price}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                />
+              </div>
 
-                  <input
-                    type="number"
-                    name="selling_price"
-                    value={formData.selling_price}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
-                  />
+              <div>
+                <label className="block mb-2 text-zinc-400">
+                  Selling Price
+                </label>
 
-                </div>
+                <input
+                  type="number"
+                  name="selling_price"
+                  value={formData.selling_price}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                />
+              </div>
 
-                <div>
+              <div>
+                <label className="block mb-2 text-zinc-400">
+                  Market Price
+                </label>
 
-                  <label className="block mb-2">
-                    Market Price
-                  </label>
-
-                  <input
-                    type="number"
-                    name="market_price"
-                    value={formData.market_price}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
-                  />
-
-                </div>
-
+                <input
+                  type="number"
+                  name="market_price"
+                  value={formData.market_price}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-black border border-zinc-800 px-4 py-3 rounded-xl"
+                />
               </div>
 
             </div>
 
           </div>
 
-          {/* VARIANTS */}
+        </div>
 
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
+        {/* VARIANTS */}
 
-            <div className="flex justify-between items-center mb-5">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 
-              <h2 className="text-xl font-bold">
-                Product Variants
-              </h2>
+          <div className="flex justify-between items-center mb-6">
 
-              <button
-                type="button"
-                onClick={addVariant}
-                className="bg-white text-black px-4 py-2 rounded-xl font-semibold"
-              >
-                + Add Variant
-              </button>
+            <h2 className="text-xl font-semibold">
+              Product Variants
+            </h2>
 
-            </div>
+            <button
+              type="button"
+              onClick={addVariant}
+              className="bg-white text-black px-5 py-2 rounded-xl font-semibold hover:scale-105 transition"
+            >
+              + Add Variant
+            </button>
 
-            <div className="space-y-4">
+          </div>
 
-              {formData.variants.map(
-                (variant, index) => (
+          <div className="space-y-4">
 
-                  <div
-                    key={index}
-                    className="grid lg:grid-cols-7 gap-3 border border-zinc-800 rounded-2xl p-4"
-                  >
+            {formData.variants.map(
+              (variant, index) => (
+
+                <div
+                  key={index}
+                  className="bg-black border border-zinc-800 rounded-2xl p-5"
+                >
+
+                  <div className="grid lg:grid-cols-6 gap-3">
 
                     <input
                       placeholder="Size"
@@ -411,7 +400,7 @@ export default function CreateItemPage() {
                           e.target.value
                         )
                       }
-                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                      className="bg-zinc-950 border border-zinc-800 px-3 py-3 rounded-xl"
                     />
 
                     <input
@@ -424,11 +413,10 @@ export default function CreateItemPage() {
                           e.target.value
                         )
                       }
-                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                      className="bg-zinc-950 border border-zinc-800 px-3 py-3 rounded-xl"
                     />
 
                     <input
-                      required
                       placeholder="SKU"
                       value={variant.sku}
                       onChange={(e) =>
@@ -438,11 +426,10 @@ export default function CreateItemPage() {
                           e.target.value
                         )
                       }
-                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                      className="bg-zinc-950 border border-zinc-800 px-3 py-3 rounded-xl"
                     />
 
                     <input
-                      required
                       placeholder="Barcode"
                       value={variant.barcode}
                       onChange={(e) =>
@@ -452,7 +439,7 @@ export default function CreateItemPage() {
                           e.target.value
                         )
                       }
-                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                      className="bg-zinc-950 border border-zinc-800 px-3 py-3 rounded-xl"
                     />
 
                     <input
@@ -466,23 +453,7 @@ export default function CreateItemPage() {
                           e.target.value
                         )
                       }
-                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
-                    />
-
-                    <input
-                      type="number"
-                      placeholder="Min Stock"
-                      value={
-                        variant.minimum_stock
-                      }
-                      onChange={(e) =>
-                        handleVariantChange(
-                          index,
-                          "minimum_stock",
-                          e.target.value
-                        )
-                      }
-                      className="bg-black border border-zinc-800 px-3 py-2 rounded-xl"
+                      className="bg-zinc-950 border border-zinc-800 px-3 py-3 rounded-xl"
                     />
 
                     <button
@@ -490,70 +461,54 @@ export default function CreateItemPage() {
                       onClick={() =>
                         removeVariant(index)
                       }
-                      className="bg-red-600 rounded-xl"
+                      className="bg-red-600 hover:bg-red-700 rounded-xl px-4"
                     >
                       Remove
                     </button>
 
                   </div>
+                </div>
 
-                )
-              )}
-
-            </div>
-
-          </div>
-
-          {/* FOOTER */}
-
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 flex justify-between items-center">
-
-            <div>
-
-              <p className="text-gray-400">
-                Variants:
-                {" "}
-                {formData.variants.length}
-              </p>
-
-              <p className="text-gray-400">
-                Total Stock:
-                {" "}
-                {totalStock}
-              </p>
-
-            </div>
-
-            <div className="flex gap-4">
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate("/stock")
-                }
-                className="bg-zinc-800 px-6 py-3 rounded-xl"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-white text-black px-8 py-3 rounded-xl font-bold"
-              >
-                {loading
-                  ? "Saving..."
-                  : "Save Product"}
-              </button>
-
-            </div>
+              )
+            )}
 
           </div>
 
-        </form>
+        </div>
 
-      </div>
+        {/* ACTIONS */}
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+
+          <div className="flex justify-end gap-4">
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/stock")
+              }
+              className="bg-zinc-800 hover:bg-zinc-700 px-6 py-3 rounded-xl"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:scale-105 transition"
+            >
+              {loading
+                ? "Saving..."
+                : "Save Product"}
+            </button>
+
+          </div>
+
+        </div>
+
+      </form>
 
     </div>
-  )
+  </div>
+)
 }
