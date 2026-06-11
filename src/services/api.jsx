@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const BASE_URL = "http://192.168.1.27:8000/api";
+const BASE_URL = "https://backend-lts0.onrender.com/api";
 
 export const getDashboard = async () => {
   const res = await axios.get(`${BASE_URL}/dashboard/`);
