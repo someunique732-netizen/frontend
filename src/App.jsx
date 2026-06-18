@@ -19,6 +19,10 @@ import AddItemPage from "./pages/AddItemPage"
 import LoginPage from "./pages/LoginPage"
 import CreateOrderPage from "./pages/CreateOrderPage"
 import ReportPage from "./pages/ReportPage"
+import EditOrderPage from "./pages/EditOrderPage";
+import PackingPage from "./pages/Packing_order";
+import BillPrint from "./pages/InvoicePage";
+
 
 // =====================================================
 // PROTECTED ROUTE
@@ -171,8 +175,11 @@ function Layout() {
           />
           <Route
             path="/createorder"
-            element={<CreateOrderPage />}
-            
+            element={
+              <ProtectedRoute>
+                <CreateOrderPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
@@ -184,6 +191,16 @@ function Layout() {
             }
           />
 
+          <Route
+            path="/editorder/:id"
+            element={
+              <ProtectedRoute>
+                <EditOrderPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/packing/:orderId" element={<ProtectedRoute><PackingPage /></ProtectedRoute>} />
+          <Route path="/bill/:orderId" element={ <ProtectedRoute> <BillPrint /> </ProtectedRoute> } />
         </Routes>
 
       </main>

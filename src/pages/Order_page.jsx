@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom"
 
 import NepaliDate from "nepali-date-converter"
 
+import PackingModal from "../components/scanner"
+
 import {
   getOrders,
   deleteOrder
@@ -13,6 +15,8 @@ import DeleteConfirmBox from "../components/DeleteConfirmBox"
 
 
 export default function OrderPage() {
+
+  const [showPendingOnly, setShowPendingOnly] = useState(false);
 
   const [loading, setLoading] = useState(false)
 
@@ -35,6 +39,12 @@ export default function OrderPage() {
   // =====================================================
   // FETCH ORDERS
   // =====================================================
+
+  useEffect(() => {
+    if (filterType !== "today") {
+      setShowPendingOnly(false);
+    }
+  }, [filterType]);
 
   useEffect(() => {
 
@@ -84,7 +94,15 @@ export default function OrderPage() {
     setLoading(false)
   }
 }
+  // =====================================================
+  // GO TO PACKING PAGE
+  // =====================================================
 
+ const goToPacking = (order) => {
+    navigate(`/packing/${order.id}`, {
+      state: order, // send full order data
+    });
+  };
   // =====================================================
   // FILTERED ORDERS
   // =====================================================
@@ -107,6 +125,13 @@ export default function OrderPage() {
       const orderDate = new Date(
         order.order_date
       )
+      // PENDING
+      if (
+        showPendingOnly &&
+        order.status === "packed"
+      ) {
+        return false;
+      }
 
       // TODAY
       if (filterType === "today") {
@@ -181,7 +206,8 @@ export default function OrderPage() {
     search,
     filterType,
     startDate,
-    endDate
+    endDate,
+    showPendingOnly
   ])
 
   // =====================================================
@@ -218,256 +244,105 @@ export default function OrderPage() {
 
         <div className="flex gap-3 w-full lg:w-auto">
 
-  <input
-    type="text"
-    value={search}
-    onChange={(e) =>
-      setSearch(e.target.value)
-    }
-    placeholder="Search customer..."
-    className="bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-2xl outline-none focus:border-white transition w-full lg:w-80"
-  />
-
-  <button
-    onClick={() => navigate("/createorder")}
-    className="bg-white text-black px-6 py-4 rounded-2xl font-bold whitespace-nowrap"
-  >
-
-    Create Order
-
-  </button>
-
-</div>
-      </div>
-
-      {/* ===================================================== */}
-      {/* FILTER CARDS */}
-      {/* ===================================================== */}
-
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-
-        {/* TODAY */}
-
-        <div
-          onClick={() =>
-            setFilterType("today")
-          }
-          className={`rounded-3xl p-5 border cursor-pointer transition ${
-            filterType === "today"
-              ? "bg-blue-500 border-blue-500"
-              : "bg-zinc-950 border-zinc-800 hover:border-zinc-600"
-          }`}
-        >
-
-          <p className="text-sm text-gray-300">
-
-            Today
-
-          </p>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            {
-              orders.filter((o) =>
-                new Date(o.order_date)
-                  .toDateString() ===
-                new Date().toDateString()
-              ).length
+          <input
+            type="text"
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
             }
-
-          </h2>
-
-        </div>
-
-        {/* YESTERDAY */}
-
-        <div
-          onClick={() =>
-            setFilterType("yesterday")
-          }
-          className={`rounded-3xl p-5 border cursor-pointer transition ${
-            filterType === "yesterday"
-              ? "bg-purple-500 border-purple-500"
-              : "bg-zinc-950 border-zinc-800 hover:border-zinc-600"
-          }`}
-        >
-
-          <p className="text-sm text-gray-300">
-
-            Yesterday
-
-          </p>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            {
-              orders.filter((o) => {
-
-                const y = new Date()
-
-                y.setDate(
-                  y.getDate() - 1
-                )
-
-                return (
-                  new Date(o.order_date)
-                    .toDateString() ===
-                  y.toDateString()
-                )
-
-              }).length
-            }
-
-          </h2>
-
-        </div>
-
-        {/* MONTH */}
-
-        <div
-          onClick={() =>
-            setFilterType("month")
-          }
-          className={`rounded-3xl p-5 border cursor-pointer transition ${
-            filterType === "month"
-              ? "bg-green-500 border-green-500"
-              : "bg-zinc-950 border-zinc-800 hover:border-zinc-600"
-          }`}
-        >
-
-          <p className="text-sm text-gray-300">
-
-            This Month
-
-          </p>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            {
-              orders.filter((o) => {
-
-                const d = new Date(
-                  o.order_date
-                )
-
-                const now = new Date()
-
-                return (
-                  d.getMonth() ===
-                  now.getMonth() &&
-                  d.getFullYear() ===
-                  now.getFullYear()
-                )
-
-              }).length
-            }
-
-          </h2>
-
-        </div>
-
-        {/* YEAR */}
-
-        <div
-          onClick={() =>
-            setFilterType("year")
-          }
-          className={`rounded-3xl p-5 border cursor-pointer transition ${
-            filterType === "year"
-              ? "bg-orange-500 border-orange-500"
-              : "bg-zinc-950 border-zinc-800 hover:border-zinc-600"
-          }`}
-        >
-
-          <p className="text-sm text-gray-300">
-
-            This Year
-
-          </p>
-
-          <h2 className="text-3xl font-black mt-2">
-
-            {
-              orders.filter((o) => {
-
-                const d = new Date(
-                  o.order_date
-                )
-
-                const now = new Date()
-
-                return (
-                  d.getFullYear() ===
-                  now.getFullYear()
-                )
-
-              }).length
-            }
-
-          </h2>
-
-        </div>
-
-        {/* TOTAL */}
-
-        <div className="rounded-3xl p-5 bg-gradient-to-br from-pink-500 to-purple-500">
-
-  <p className="text-sm">
-
-    Total Orders
-
-  </p>
-
-  <h2 className="text-3xl font-black mt-2">
-
-    {totalOrders}
-
-  </h2>
-
-</div>
-
-      </div>
-
-      {/* ===================================================== */}
-      {/* CUSTOM DATE */}
-      {/* ===================================================== */}
-
-      <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-8">
-
-        <div className="flex flex-col lg:flex-row gap-4 items-center">
+            placeholder="Search customer..."
+            className="bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-2xl outline-none focus:border-white transition w-full lg:w-80"
+          />
 
           <button
-            onClick={() =>
-              setFilterType("custom")
-            }
-            className="bg-white text-black px-5 py-3 rounded-2xl font-bold"
+            onClick={() => navigate("/createorder")}
+            className="bg-white text-black px-6 py-4 rounded-2xl font-bold whitespace-nowrap"
           >
 
-            Custom Filter
+            Create Order
 
           </button>
 
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) =>
-              setStartDate(e.target.value)
-            }
-            className="bg-black border border-zinc-700 px-5 py-3 rounded-2xl"
-          />
-
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) =>
-              setEndDate(e.target.value)
-            }
-            className="bg-black border border-zinc-700 px-5 py-3 rounded-2xl"
-          />
-
         </div>
-
       </div>
+
+      {/* FILTER TOOLBAR */}
+
+<div className="flex flex-wrap items-center gap-3 mb-8">
+
+  <select
+    value={filterType}
+    onChange={(e) =>
+      setFilterType(e.target.value)
+    }
+    className="bg-zinc-950 border border-zinc-800 px-4 py-4 rounded-2xl outline-none"
+  >
+    <option value="today">
+      Today
+    </option>
+
+    <option value="yesterday">
+      Yesterday
+    </option>
+
+    <option value="month">
+      This Month
+    </option>
+
+    <option value="year">
+      This Year
+    </option>
+
+    <option value="custom">
+      Custom Range
+    </option>
+
+  </select>
+
+  {filterType === "today" && (
+    <button
+      onClick={() =>
+        setShowPendingOnly(!showPendingOnly)
+      }
+      className={`px-4 py-4 rounded-2xl font-semibold transition ${
+        showPendingOnly
+          ? "bg-green-500 text-black"
+          : "bg-zinc-950 border border-zinc-800"
+      }`}
+    >
+      Pending Orders
+    </button>
+  )}
+
+  {filterType === "custom" && (
+    <>
+      <input
+        type="date"
+        value={startDate}
+        onChange={(e) =>
+          setStartDate(e.target.value)
+        }
+        className="bg-zinc-950 border border-zinc-800 px-4 py-4 rounded-2xl"
+      />
+
+      <input
+        type="date"
+        value={endDate}
+        onChange={(e) =>
+          setEndDate(e.target.value)
+        }
+        className="bg-zinc-950 border border-zinc-800 px-4 py-4 rounded-2xl"
+      />
+    </>
+  )}
+
+  <div className="ml-auto bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-4 rounded-2xl font-bold">
+
+    Orders: {totalOrders}
+
+  </div>
+
+</div>
 
       {/* ===================================================== */}
       {/* TABLE */}
@@ -498,6 +373,7 @@ export default function OrderPage() {
                   <th className="p-5">Amount</th>
                   <th className="p-5">Date</th>
                   <th className="p-5">Items</th>
+                  <th className="p-5">Status</th>
                   <th className="p-5 text-center">
                     Actions
                   </th>
@@ -572,6 +448,17 @@ export default function OrderPage() {
                         } items
 
                       </td>
+                      <td className="p-5">
+                        {order.status === "packed" ? (
+                          <span className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-xl">
+                            Packed
+                          </span>
+                        ) : (
+                          <span className="bg-yellow-500/10 text-yellow-400 px-3 py-1 rounded-xl">
+                            Pending
+                          </span>
+                        )}
+                      </td>
 
                       {/* ACTIONS */}
 
@@ -579,26 +466,36 @@ export default function OrderPage() {
 
                         <div className="flex justify-center gap-3">
 
+                          {new Date(order.order_date).toDateString() ===
+                            new Date().toDateString() &&
+                            order.status !== "packed" && (
+                              <button
+                                onClick={() => goToPacking(order)}
+                                className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl text-sm font-semibold transition"
+                              >
+                                Packing
+                              </button>
+                            )
+                          }
+
                           <button
-                            onClick={() =>
-                              setSelectedOrder(order)
-                            }
-                            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition"
-                          >
-
-                            View
-
+                            onClick={() => navigate(`/editorder/${order.id}`)}
+                            className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl text-sm font-semibold transition">
+                            Edit
                           </button>
 
                           <button
-                            onClick={() =>
-                              setDeleteOrderId(order.id)
-                            }
+                            onClick={() => setDeleteOrderId(order.id)}
                             className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-sm font-semibold transition"
                           >
-
                             Delete
+                          </button>
 
+                          <button
+                            onClick={() => navigate(`/bill/${order.id}`)}
+                            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-xl text-sm font-semibold transition"
+                          >
+                            Bill
                           </button>
 
                         </div>
@@ -620,146 +517,19 @@ export default function OrderPage() {
 
       </div>
 
-      {/* ===================================================== */}
-      {/* VIEW MODAL */}
-      {/* ===================================================== */}
-
-      {selectedOrder && (
-
-        <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
-          onClick={() =>
-            setSelectedOrder(null)
-          }
-        >
-
-          <div
-            className="bg-zinc-950 border border-zinc-800 rounded-[40px] p-8 w-[95%] max-w-xl"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-
-            <div className="flex justify-between items-center mb-6">
-
-              <h2 className="text-3xl font-black">
-
-                Order #{selectedOrder.id}
-
-              </h2>
-
-              <button
-                onClick={() =>
-                  setSelectedOrder(null)
-                }
-                className="bg-white/10 w-10 h-10 rounded-full"
-              >
-
-                ✕
-
-              </button>
-
-            </div>
-
-            <div className="space-y-4 text-gray-300">
-
-              <div className="bg-black/40 rounded-2xl p-4">
-
-                <p className="text-sm text-gray-500">
-
-                  Customer
-
-                </p>
-
-                <h3 className="text-xl font-bold mt-1">
-
-                  {
-                    selectedOrder.customer
-                      ?.customer_name
-                  }
-
-                </h3>
-
-              </div>
-
-              <div className="bg-black/40 rounded-2xl p-4">
-
-                <p className="text-sm text-gray-500">
-
-                  Total Amount
-
-                </p>
-
-                <h3 className="text-2xl font-black text-green-400 mt-1">
-
-                  Rs. {
-                    selectedOrder.total_amount
-                  }
-
-                </h3>
-
-              </div>
-
-              <div>
-
-                <h3 className="text-lg font-bold mb-3">
-
-                  Ordered Items
-
-                </h3>
-
-                <div className="space-y-3">
-
-                  {selectedOrder.items?.map(
-                    (item, idx) => (
-
-                      <div
-                        key={idx}
-                        className="bg-black/40 rounded-2xl p-4 flex justify-between"
-                      >
-
-                        <span>
-
-                          {item.item_name}
-
-                        </span>
-
-                        <span>
-
-                          × {item.quantity}
-
-                        </span>
-
-                      </div>
-
-                    )
-                  )}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
 
       {/* ===================================================== */}
       {/* DELETE MODAL */}
       {/* ===================================================== */}
 
      {/* DELETE BOX COMPONENT (NO UI CHANGE) */}
-{deleteOrderId && (
-  <DeleteConfirmBox
-    onCancel={() => setDeleteOrderId(null)}
-    onConfirm={confirmDelete}
-    loading={loading}
-  />
-)}
-
+      {deleteOrderId && (
+        <DeleteConfirmBox
+          onCancel={() => setDeleteOrderId(null)}
+          onConfirm={confirmDelete}
+          loading={loading}
+        />
+      )}
     </div>
   )
 }

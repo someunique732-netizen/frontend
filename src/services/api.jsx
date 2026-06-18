@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const BASE_URL = "https://backend-lts0.onrender.com/api";
+const BASE_URL = "http://192.168.1.37:8000/api";
 
 export const getDashboard = async () => {
   const res = await axios.get(`${BASE_URL}/dashboard/`);
@@ -329,3 +329,23 @@ export async function getVariants() {
   return res.data
 }
 
+export async function getOrderById(id) {
+  return request(
+    `${BASE_URL}/orders/${id}/`
+  )
+}
+
+
+export async function markPacked(id) {
+  const response = await fetch(
+    `${BASE_URL}/orders/${id}/mark_packed/`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  return response.json();
+}
+export async function getOrderBill(id) {
+  return request(`${BASE_URL}/orders/${id}/bill/`)
+}

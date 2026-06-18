@@ -43,9 +43,8 @@ export default function CreateOrderPage() {
       phone2: "",
       municipality: "",
       address: "",
-      remark: ""
-
     },
+    remark: "",
 
     delivery_charge: 0,
 
