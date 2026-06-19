@@ -22,6 +22,7 @@ import ReportPage from "./pages/ReportPage"
 import EditOrderPage from "./pages/EditOrderPage";
 import PackingPage from "./pages/Packing_order";
 import BillPrint from "./pages/InvoicePage";
+import CompanySettingsPage from "./pages/CompanySettingsPage"
 
 
 // =====================================================
@@ -201,7 +202,9 @@ function Layout() {
           />
           <Route path="/packing/:orderId" element={<ProtectedRoute><PackingPage /></ProtectedRoute>} />
           <Route path="/bill/:orderId" element={ <ProtectedRoute> <BillPrint /> </ProtectedRoute> } />
+          <Route path="/settings/company" element={<ProtectedRoute><CompanySettingsPage /></ProtectedRoute>} />
         </Routes>
+
 
       </main>
 

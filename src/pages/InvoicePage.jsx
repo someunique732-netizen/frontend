@@ -1,8 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
+import {
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaGlobe
+} from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { getOrderBill } from "../services/api";
-
-const BASE_MEDIA = "http://192.168.1.37:8000";
+import { BASE_MEDIA } from "../services/api";
 
 export default function BillPrint() {
   const { orderId } = useParams();
@@ -60,418 +65,354 @@ export default function BillPrint() {
   return (
     <div className="bg-gray-200 min-h-screen p-6">
 
-      {/* PRINT BUTTON */}
-      <div className="text-center mb-4 no-print">
-        <button
-          onClick={handlePrint}
-          className="bg-black text-white px-5 py-2 rounded-lg font-semibold"
-        >
-          Print Bill
-        </button>
-      </div>
+      <div className="no-print bg-white border-b px-6 py-4 mb-4 flex items-center justify-between shadow-sm">
+
+  {/* Left Side */}
+  <div className="flex items-center gap-4">
+
+    <button
+      onClick={() => window.history.back()}
+      className="text-gray-700 hover:text-black text-4xl font-bold leading-none"
+    >
+      ←
+    </button>
+
+    <h1 className="text-xl font-semibold text-gray-900">
+      Sales Invoice #{bill.invoice_no}
+    </h1>
+
+  </div>
+
+  {/* Right Side */}
+  <div className="flex items-center gap-3">
+
+    <button
+      onClick={handlePrint}
+      className="flex items-center gap-2 border border-gray-300 bg-white px-5 py-3 rounded-xl text-black font-medium shadow-sm hover:bg-gray-100"
+    >
+      <span className="text-lg">🖨️</span>
+      <span>Print Receipt</span>
+    </button>
+
+    <button className="border border-gray-300 bg-white p-3 rounded-xl text-black shadow-sm hover:bg-gray-100">
+      ⋮
+    </button>
+
+  </div>
+
+</div>
 
       {/* BILL */}
-      <div ref={printRef} className="invoice">
+      <div
+  ref={printRef}
+  className="invoice w-[79mm] mx-auto bg-white text-black p-3 text-sm"
+>
 
-        {/* HEADER */}
-        <div className="text-center">
+  {/* Header */}
+  <div className="text-center">
 
-          <p className="top-title">
-            THANK YOU FOR SHOPPING!
-          </p>
+  <p className="font-bold text-xs mb-2">
+    THANK YOU FOR SHOPPING!
+  </p>
 
-          {company?.logo && (
-            <img
-              src={`${BASE_MEDIA}${company.logo}`}
-              alt="logo"
-              className="logo"
-            />
-          )}
+  <div className="flex items-center justify-center gap-4 mb-3">
 
-          <h1 className="shop-name">
-            {company?.company_name}
-          </h1>
+    {company?.logo && (
+      <img
+        src={`${BASE_MEDIA}${company.logo}`}
+        alt="logo"
+        className="w-20 h-20 object-contain"
+      />
+    )}
 
-          <p>{company?.address}</p>
-          <p>{company?.phone}</p>
+    <div className="text-left">
 
-          {company?.email && (
-            <p>{company.email}</p>
-          )}
-        </div>
+      <h1 className="text-3xl font-black leading-none">
+        {company?.company_name}
+      </h1>
 
-        <hr />
+      <p className="tracking-[4px] text-sm font-semibold">
+          CLOTHING STORE
+      </p>
 
-        {/* INVOICE TITLE */}
-        <div className="text-center mt-3">
+    </div>
 
-          <h2 className="invoice-title">
-            INVOICE
-          </h2>
+  </div>
 
-          <div className="invoice-number">
-            {bill.invoice_no}
-          </div>
+  <hr className="border-black my-2" />
 
-        </div>
+  <div className="space-y-1 text-sm">
 
-        {/* ORDER INFO */}
-        <div className="info-section">
+    <div className="flex items-start gap-2 justify-center">
+      <FaMapMarkerAlt className="mt-1 shrink-0" />
+      <span>{company?.address}</span>
+    </div>
 
-          <div className="row">
-            <span>Date</span>
-            <span>{bill.date}</span>
-          </div>
+    <div className="flex items-center gap-2 justify-center">
+      <FaPhoneAlt />
+      <span>{company?.phone}</span>
+    </div>
 
-          <div className="row">
-            <span>Time</span>
-            <span>{bill.time}</span>
-          </div>
-
-          <div className="row">
-            <span>Order ID</span>
-            <span>#{bill.order_id}</span>
-          </div>
-
-          <div className="row">
-            <span>Sales Person</span>
-            <span>{salesperson?.name || "-"}</span>
-          </div>
-
-          <div className="row">
-            <span>Payment</span>
-            <span>Cash</span>
-          </div>
-
-          <div className="row">
-            <span>Delivery</span>
-            <span>{bill.delivery_method}</span>
-          </div>
-
-        </div>
-
-        <hr />
-
-        {/* CUSTOMER */}
-        <div className="customer-section">
-
-          <h3>BILL TO</h3>
-
-          <p className="customer-name">
-            {customer?.name}
-          </p>
-
-          <p>{customer?.phone}</p>
-
-          <p>
-            {customer?.address}
-            <br />
-            {customer?.municipality}
-          </p>
-
-        </div>
-
-        <hr />
-
-        {/* ITEMS */}
-        <table className="item-table">
-
-          <thead>
-            <tr>
-              <th align="left">Item</th>
-              <th>Qty</th>
-              <th>Rate</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            {items?.map((item, index) => (
-              <tr key={index}>
-                <td>
-
-                  {item.item_name}
-
-                  <div className="variant">
-                    {item.size} / {item.design}
-                  </div>
-
-                </td>
-
-                <td>{item.qty}</td>
-
-                <td>
-                  {Number(item.rate).toFixed(2)}
-                </td>
-
-                <td>
-                  {Number(item.total).toFixed(2)}
-                </td>
-              </tr>
-            ))}
-
-          </tbody>
-
-        </table>
-
-        <hr />
-
-        {/* SUMMARY */}
-        <div className="summary">
-
-          <div className="row">
-            <span>Sub Total</span>
-            <span>
-              {Number(summary?.subtotal).toFixed(2)}
-            </span>
-          </div>
-
-          <div className="row">
-            <span>Discount</span>
-            <span>
-              - {Number(summary?.discount).toFixed(2)}
-            </span>
-          </div>
-
-          <div className="row">
-            <span>Delivery Charge</span>
-            <span>
-              {Number(summary?.delivery_charge).toFixed(2)}
-            </span>
-          </div>
-
-          <div className="grand-total">
-
-            <div className="row">
-              <span>GRAND TOTAL</span>
-
-              <span>
-                {Number(summary?.grand_total).toFixed(2)}
-              </span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* PAYMENT BOX */}
-        <div className="payment-box">
-
-          <div className="row">
-            <span>Paid Amount (Advance)</span>
-
-            <span>
-              {Number(summary?.advance_paid).toFixed(2)}
-            </span>
-          </div>
-
-          <div className="due-box">
-
-            <div className="row">
-              <span>DUE AMOUNT</span>
-
-              <span>
-                {Number(summary?.due_amount).toFixed(2)}
-              </span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* QR CODE */}
-        {company?.qr_code && (
-          <div className="qr-section">
-
-            <img
-              src={`${BASE_MEDIA}${company.qr_code}`}
-              alt="qr"
-              className="qr"
-            />
-
-            <p>Scan To Pay</p>
-
-          </div>
-        )}
-
-        {/* FOOTER */}
-        <div className="footer">
-
-          <hr />
-
-          <p>We appreciate your business!</p>
-
-          <p>
-            Please keep this bill for your records.
-          </p>
-
-        </div>
-
+    {company?.email && (
+      <div className="flex items-center gap-2 justify-center">
+        <FaEnvelope />
+        <span>{company?.email}</span>
       </div>
+    )}
 
-      {/* CSS */}
-      <style>{`
+    {company?.website && (
+      <div className="flex items-center gap-2 justify-center">
+        <FaGlobe />
+        <span>{company?.website}</span>
+      </div>
+    )}
 
-        .invoice{
-          width:79mm;
-          background:white;
-          color:black;
-          margin:auto;
-          padding:10px;
-          font-family:Arial, sans-serif;
-          font-size:12px;
-          box-shadow:0 0 10px rgba(0,0,0,.2);
-        }
+  </div>
 
-        .top-title{
-          font-size:12px;
-          font-weight:bold;
-          margin-bottom:8px;
-        }
+</div>
 
-        .logo{
-          width:65px;
-          height:auto;
-          margin:auto;
-          margin-bottom:5px;
-        }
+  <hr className="my-3 border-dashed border-black" />
 
-        .shop-name{
-          font-size:26px;
-          font-weight:bold;
-          margin:0;
-        }
+  {/* Invoice */}
+  <div className="text-center">
+    <h2 className="font-bold text-2xl">
+      INVOICE
+    </h2>
 
-        .invoice-title{
-          font-size:18px;
-          margin-bottom:6px;
-        }
+    <span className="inline-block bg-black text-white px-3 py-1 rounded font-bold">
+      {bill.invoice_no}
+    </span>
+  </div>
 
-        .invoice-number{
-          display:inline-block;
-          background:black;
-          color:white;
-          padding:4px 12px;
-          border-radius:4px;
-          font-weight:bold;
-          font-size:13px;
-        }
+  {/* Sales Person Info */}
+  <div className="mt-3 text-sm">
 
-        .info-section,
-        .customer-section,
-        .summary{
-          margin-top:8px;
-        }
+  <div className="flex justify-between">
+    <span>Date</span>
+    <span>{bill.date}</span>
+    <span>{bill.time}</span>
+  </div>
 
-        .customer-name{
-          font-weight:bold;
-          font-size:14px;
-        }
+  <div className="flex justify-between">
+    <span>Order ID</span>
+    <span>#{bill.order_id}</span>
+  </div>
 
-        .row{
-          display:flex;
-          justify-content:space-between;
-          margin:3px 0;
-        }
+  <div className="flex justify-between">
+    <span>Sales Person</span>
+    <span>{salesperson?.name}</span>
+  </div>
 
-        .item-table{
-          width:100%;
-          border-collapse:collapse;
-          margin-top:8px;
-        }
+  <div className="flex justify-between">
+    <span>Payment Type</span>
+    <span>Cash</span>
+  </div>
 
-        .item-table th{
-          border-bottom:1px dashed #999;
-          padding:4px;
-        }
+   <div className="flex justify-between">
+    <span>Delivery</span>
+    <span>{bill.delivery_method || "-"}</span>
+  </div>
 
-        .item-table td{
-          padding:5px 3px;
-          vertical-align:top;
-          text-align:center;
-        }
 
-        .item-table td:first-child{
-          text-align:left;
-        }
+</div>
+ {/* CUSTOMER INFO */}
+<div className="border-t border-dashed border-black mt-2 pt-2">
+  <h3 className="font-bold text-lg">
+    BILL TO:
+  </h3>
 
-        .variant{
-          font-size:10px;
-          color:#666;
-        }
+  <p className="font-bold">
+    {customer?.name}
+  </p>
 
-        .grand-total{
-          border-top:1px dashed #000;
-          margin-top:5px;
-          padding-top:5px;
-          font-weight:bold;
-          font-size:14px;
-        }
+  <div className="flex items-center gap-2">
+    <FaPhoneAlt className="text-xs" />
+    <span>{customer?.phone}</span>
+  </div>
 
-        .payment-box{
-          border:1px solid #000;
-          margin-top:10px;
-        }
+  <div className="flex items-start gap-2">
+    <FaMapMarkerAlt className="mt-1 text-xs shrink-0" />
+    <span>
+      {customer?.address}
+      <br />
+      {customer?.municipality}
+    </span>
+  </div>
+</div>
 
-        .payment-box .row{
-          padding:6px;
-        }
+{/* ITEMS INFO */}
+<table className="w-full text-sm mt-2">
+  <thead>
+    <tr className="border-y border-dashed border-black">
+      <th className="text-left py-1">Item</th>
+      <th>Qty</th>
+      <th>Rate</th>
+      <th className="text-right">Total</th>
+    </tr>
+  </thead>
 
-        .due-box{
-          border-top:1px solid black;
-          font-weight:bold;
-          font-size:15px;
-        }
+  <tbody>
+    {items.map((item,index)=>(
+      <tr key={index}>
+        <td className="py-1">
+          <div>{item.item_name}</div>
+          <div className="text-xs text-gray-600">
+            {item.size} / {item.design}
+          </div>
+        </td>
 
-        .qr-section{
-          text-align:center;
-          margin-top:12px;
-        }
+        <td className="text-center">
+          {item.qty}
+        </td>
 
-        .qr{
-          width:110px;
-          height:110px;
-          margin:auto;
-        }
+        <td className="text-center">
+          {Number(item.rate).toFixed(2)}
+        </td>
 
-        .footer{
-          text-align:center;
-          margin-top:10px;
-          font-size:11px;
-        }
+        <td className="text-right">
+          {Number(item.total).toFixed(2)}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
-        hr{
-          border:none;
-          border-top:1px dashed #999;
-          margin:8px 0;
-        }
+{/* SUMMARY */}
+<div className="border-t border-dashed border-black mt-2 pt-2">
 
-        @page{
-          size:79mm auto;
-          margin:0;
-        }
+  <div className="flex justify-between">
+    <span>Sub Total</span>
+    <span>{Number(summary?.subtotal).toFixed(2)}</span>
+  </div>
 
-        @media print{
+  {Number(summary?.discount) > 0 && (
+  <div className="flex justify-between">
+    <span>Discount</span>
+    <span>-{Number(summary?.discount).toFixed(2)}</span>
+  </div>
+)}
 
-          body{
-            background:white !important;
-          }
+  <div className="flex justify-between">
+    <span>Delivery Charge</span>
+    <span>{Number(summary?.delivery_charge).toFixed(2)}</span>
+  </div>
 
-          .no-print{
-            display:none !important;
-          }
+</div>
 
-          .invoice{
-            box-shadow:none;
-            width:79mm;
-            margin:0;
-            padding:6px;
-          }
+ {/* TOTAL AMOUNT */}
+<div className="border-y border-dashed border-black py-2 mt-2">
 
-        }
+  <div className="flex justify-between font-extrabold text-xl">
 
-      `}</style>
+    <span>GRAND TOTAL</span>
+
+    <span>
+      {Number(summary?.grand_total).toFixed(2)}
+    </span>
+
+  </div>
+
+</div>
+ {/* DUE AMOUNT */}
+<div className="border border-black mt-3">
+
+  <div className="flex justify-between p-2">
+    <span>Paid Amount (Advance)</span>
+
+    <span>
+      {Number(summary?.advance_paid).toFixed(2)}
+    </span>
+  </div>
+
+  <div className="border-t border-black flex justify-between p-2 font-bold text-lg">
+
+    <span>DUE AMOUNT</span>
+
+    <span>
+      {Number(summary?.due_amount).toFixed(2)}
+    </span>
+
+  </div>
+
+</div>
+
+  {/* QR CODE */}
+  {company?.qr_code && (
+  <div className="text-center mt-4">
+
+    <img
+      src={`${BASE_MEDIA}${company.qr_code}`}
+      alt="QR"
+      className="w-28 h-28 mx-auto"
+    />
+
+    <p className="text-lg">
+      Scan to Pay
+    </p>
+
+  </div>
+)}
+
+  {/* FOOTER */}
+  <div className="text-center mt-4 border-t border-black pt-2">
+
+  <p className="font-medium">
+    Exchange within 7 days with receipt
+  </p>
+
+  <p className="font-medium">
+    Please come again.
+  </p>
+
+</div>
+
+</div>
+<style>{`
+
+@page {
+  size: 79mm auto;
+  margin: 0;
+}
+
+@media print {
+
+  html,
+  body {
+    width: 79mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .invoice,
+  .invoice * {
+    visibility: visible;
+  }
+
+  .invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 79mm !important;
+    max-width: 79mm !important;
+    min-width: 79mm !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+`}</style>
 
     </div>
   );

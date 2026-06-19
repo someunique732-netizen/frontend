@@ -1,7 +1,9 @@
 import axios from "axios";
 
 
-const BASE_URL = "http://192.168.1.37:8000/api";
+const BASE_URL = "http://192.168.1.95:8000/api";
+
+export const BASE_MEDIA = "http://192.168.1.95:8000";
 
 export const getDashboard = async () => {
   const res = await axios.get(`${BASE_URL}/dashboard/`);
@@ -348,4 +350,36 @@ export async function markPacked(id) {
 }
 export async function getOrderBill(id) {
   return request(`${BASE_URL}/orders/${id}/bill/`)
+}
+
+export async function getCompany() {
+  const res = await fetch(
+    `${BASE_URL}/company/`
+  );
+
+  return res.json();
+}
+
+export async function createCompany(formData) {
+  const res = await fetch(
+    `${BASE_URL}/company/`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  return res.json();
+}
+
+export async function updateCompany(id, formData) {
+  const res = await fetch(
+    `${BASE_URL}/company/${id}/`,
+    {
+      method: "PUT",
+      body: formData,
+    }
+  );
+
+  return res.json();
 }
