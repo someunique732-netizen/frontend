@@ -5,6 +5,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom"
+import { useState, useEffect } from "react"
 
 import Sidebar from "./components/Sidebar"
 
@@ -23,6 +24,8 @@ import EditOrderPage from "./pages/EditOrderPage";
 import PackingPage from "./pages/Packing_order";
 import BillPrint from "./pages/InvoicePage";
 import CompanySettingsPage from "./pages/CompanySettingsPage"
+import LayoutSettingsPage from "./pages/LayoutSettingsPage"
+
 
 
 // =====================================================
@@ -48,32 +51,59 @@ function Layout() {
 
   const isLoginPage = location.pathname === "/"
 
+  const [theme, setTheme] = useState("dark")
+
+  useEffect(() => {
+
+    const settings = JSON.parse(
+      localStorage.getItem("layoutSettings") || "{}"
+    )
+
+    setTheme(settings.theme || "dark")
+
+    const handleStorage = () => {
+
+      const updated = JSON.parse(
+        localStorage.getItem("layoutSettings") || "{}"
+      )
+
+      setTheme(updated.theme || "dark")
+    }
+
+    window.addEventListener("storage", handleStorage)
+
+    return () =>
+      window.removeEventListener(
+        "storage",
+        handleStorage
+      )
+
+  }, [])
+
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white flex">
-
-      {/* SIDEBAR HIDE ON LOGIN PAGE */}
+    <div
+      className={`min-h-screen flex transition-all duration-300 ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white"
+          : "bg-gray-100 text-gray-900"
+      }`}
+    >
 
       {!isLoginPage && <Sidebar />}
 
-      {/* MAIN */}
-
-      <main className={`flex-1 overflow-auto ${!isLoginPage ? "ml-72" : ""}`}>
+      <main
+        className={`flex-1 overflow-auto ${
+          !isLoginPage ? "ml-72" : ""
+        }`}
+      >
 
         <Routes>
-
-          {/* ===================================================== */}
-          {/* LOGIN */}
-          {/* ===================================================== */}
 
           <Route
             path="/"
             element={<LoginPage />}
           />
-
-          {/* ===================================================== */}
-          {/* DASHBOARD */}
-          {/* ===================================================== */}
 
           <Route
             path="/dashboard"
@@ -84,10 +114,6 @@ function Layout() {
             }
           />
 
-          {/* ===================================================== */}
-          {/* CUSTOMERS */}
-          {/* ===================================================== */}
-
           <Route
             path="/customers"
             element={
@@ -96,10 +122,6 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-
-          {/* ===================================================== */}
-          {/* ORDERS */}
-          {/* ===================================================== */}
 
           <Route
             path="/orders"
@@ -110,10 +132,6 @@ function Layout() {
             }
           />
 
-          {/* ===================================================== */}
-          {/* STOCK */}
-          {/* ===================================================== */}
-
           <Route
             path="/stock"
             element={
@@ -122,10 +140,6 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-
-          {/* ===================================================== */}
-          {/* SETTINGS */}
-          {/* ===================================================== */}
 
           <Route
             path="/settings"
@@ -136,10 +150,6 @@ function Layout() {
             }
           />
 
-          {/* ===================================================== */}
-          {/* STAFF */}
-          {/* ===================================================== */}
-
           <Route
             path="/staff"
             element={
@@ -148,10 +158,6 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-
-          {/* ===================================================== */}
-          {/* ADD STAFF */}
-          {/* ===================================================== */}
 
           <Route
             path="/staff/add-staff"
@@ -162,10 +168,6 @@ function Layout() {
             }
           />
 
-          {/* ===================================================== */}
-          {/* ADD ITEM */}
-          {/* ===================================================== */}
-
           <Route
             path="/stock/add-item"
             element={
@@ -174,6 +176,7 @@ function Layout() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/createorder"
             element={
@@ -200,18 +203,50 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-          <Route path="/packing/:orderId" element={<ProtectedRoute><PackingPage /></ProtectedRoute>} />
-          <Route path="/bill/:orderId" element={ <ProtectedRoute> <BillPrint /> </ProtectedRoute> } />
-          <Route path="/settings/company" element={<ProtectedRoute><CompanySettingsPage /></ProtectedRoute>} />
-        </Routes>
 
+          <Route
+            path="/packing/:orderId"
+            element={
+              <ProtectedRoute>
+                <PackingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/bill/:orderId"
+            element={
+              <ProtectedRoute>
+                <BillPrint />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings/company"
+            element={
+              <ProtectedRoute>
+                <CompanySettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings/layout"
+            element={
+              <ProtectedRoute>
+                <LayoutSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+        </Routes>
 
       </main>
 
     </div>
   )
 }
-
 // =====================================================
 // APP
 // =====================================================

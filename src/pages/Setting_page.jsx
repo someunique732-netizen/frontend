@@ -51,7 +51,8 @@ export default function SettingsPage() {
           </div>
 
           <button
-            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:scale-105 transition"
+            onClick={() => navigate("/settings/profile")}
+            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-gray-100 transition"
           >
             Open Profile
           </button>
@@ -80,7 +81,8 @@ export default function SettingsPage() {
           </div>
 
           <button
-            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:scale-105 transition"
+            onClick={() => navigate("/settings/security")}
+            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-gray-100 transition"
           >
             Security Settings
           </button>
@@ -109,7 +111,8 @@ export default function SettingsPage() {
           </div>
 
           <button
-            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:scale-105 transition"
+            onClick={() => navigate("/settings/notifications")}
+            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-gray-100 transition"
           >
             Manage Notifications
           </button>
@@ -138,7 +141,8 @@ export default function SettingsPage() {
           </div>
 
           <button
-            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:scale-105 transition"
+            onClick={() => navigate("/settings/appearance")}
+            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-gray-100 transition"
           >
             Customize UI
           </button>
@@ -197,9 +201,40 @@ export default function SettingsPage() {
           </div>
 
           <button
-            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:scale-105 transition"
+            onClick={() => navigate("/settings/system")}
+            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-gray-100 transition"
           >
             System Details
+          </button>
+
+        </div>
+
+        {/* Layout Settings — single card, no duplicate */}
+        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 hover:scale-105 transition-all duration-300">
+
+          <div className="flex justify-between items-start">
+
+            <div>
+              <h2 className="text-3xl font-bold">
+                Layout
+              </h2>
+
+              <p className="text-gray-400 mt-4">
+                Customize sidebar, dashboard cards, table density and layout preferences
+              </p>
+            </div>
+
+            <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-2xl">
+              📐
+            </div>
+
+          </div>
+
+          <button
+            onClick={() => navigate("/settings/layout")}
+            className="mt-8 w-full bg-indigo-500 text-white py-4 rounded-2xl font-semibold hover:bg-indigo-600 transition"
+          >
+            Layout Settings
           </button>
 
         </div>
@@ -227,7 +262,7 @@ export default function SettingsPage() {
 
           <button
             onClick={handleLogout}
-            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:scale-105 transition"
+            className="mt-8 w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-gray-100 transition"
           >
             Logout Account
           </button>

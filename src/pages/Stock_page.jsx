@@ -20,6 +20,8 @@ export default function StockPage() {
 
   const [search, setSearch] = useState("")
 
+  const [expandedItem, setExpandedItem] = useState(null)
+
   // =====================================================
   // LOAD STOCK
   // =====================================================
@@ -314,179 +316,235 @@ export default function StockPage() {
 
               <thead className="sticky top-0 bg-black z-10">
 
-                <tr className="border-b border-zinc-800 text-left">
+<tr className="border-b border-zinc-800">
 
-                  <th className="px-4 py-3">
-                    SKU
-                  </th>
+  <th className="px-4 py-3"></th>
 
-                  <th className="px-4 py-3">
-                    Product Name
-                  </th>
+  <th className="px-4 py-3">
+    Product Name
+  </th>
 
-                  <th className="px-4 py-3">
-                    Price
-                  </th>
+  <th className="px-4 py-3">
+    Price
+  </th>
 
-                  <th className="px-4 py-3">
-                    Stock
-                  </th>
+  <th className="px-4 py-3">
+    Total Stock
+  </th>
 
-                  <th className="px-4 py-3">
-                    Status
-                  </th>
+  <th className="px-4 py-3">
+    Status
+  </th>
 
-                  <th className="px-4 py-3">
-                    Actions
-                  </th>
+  <th className="px-4 py-3">
+    Actions
+  </th>
 
-                </tr>
+</tr>
 
-              </thead>
+</thead>
 
               {/* BODY */}
 
               <tbody>
 
-                {filteredProducts.map((product) => {
+  {filteredProducts.map((product) => {
 
-                  let status = "In Stock"
+    const totalStock =
+      product.total_stock ??
+      product.variants?.reduce(
+        (sum, v) => sum + v.stock,
+        0
+      ) ??
+      0
 
-                  let statusColor =
-                    "bg-green-500/10 text-green-400"
+    let status = "In Stock"
+    let statusColor =
+      "bg-green-500/10 text-green-400"
 
-                  if (product.stock <= 0) {
+    if (totalStock <= 0) {
+      status = "Out of Stock"
+      statusColor =
+        "bg-red-500/10 text-red-400"
+    }
+    else if (totalStock <= 10) {
+      status = "Low Stock"
+      statusColor =
+        "bg-yellow-500/10 text-yellow-400"
+    }
 
-                    status = "Out of Stock"
+    return (
+      <>
+        {/* PRODUCT ROW */}
+        <tr
+          key={product.id}
+          onClick={() =>
+            setExpandedItem(
+              expandedItem === product.id
+                ? null
+                : product.id
+            )
+          }
+          className="
+            border-b
+            border-zinc-800
+            hover:bg-white/5
+            cursor-pointer
+            transition
+          "
+        >
 
-                    statusColor =
-                      "bg-red-500/10 text-red-400"
+          {/* ARROW */}
+          <td className="px-4 py-3 text-lg">
+            {expandedItem === product.id
+              ? "▼"
+              : "▶"}
+          </td>
 
-                  }
+          {/* PRODUCT */}
+          <td className="px-4 py-3 font-medium">
+            {product.item_name}
+          </td>
 
-                  else if (product.stock <= 10) {
+          {/* PRICE */}
+          <td className="px-4 py-3">
+            Rs. {product.selling_price}
+          </td>
 
-                    status = "Low Stock"
+          {/* TOTAL STOCK */}
+          <td className="px-4 py-3 font-semibold">
+            {totalStock}
+          </td>
 
-                    statusColor =
-                      "bg-yellow-500/10 text-yellow-400"
+          {/* STATUS */}
+          <td className="px-4 py-3">
+            <span
+              className={`px-3 py-1 rounded-lg text-xs font-medium ${statusColor}`}
+            >
+              {status}
+            </span>
+          </td>
 
-                  }
+          {/* ACTIONS */}
+          <td className="px-4 py-3">
 
-                  return (
+            <div className="flex gap-2">
 
-                    <tr
-                      key={product.id}
-                      className="border-b border-zinc-800 hover:bg-white/5 transition"
-                    >
+              <button
+                className="px-3 py-1 rounded-lg bg-orange-500 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation()
+                }}
+              >
+                Edit
+              </button>
 
-                      {/* SKU */}
-                      <td className="px-4 py-3 text-gray-400">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
 
-                        {product.sku}
+                  setSelectedProduct(product)
 
-                      </td>
+                  setShowDeleteModal(true)
+                }}
+                className="px-3 py-1 rounded-lg bg-red-500 text-xs"
+              >
+                Delete
+              </button>
 
-                      {/* PRODUCT */}
-                      <td className="px-4 py-3 font-medium">
+            </div>
 
-                        {product.item_name}
+          </td>
 
-                      </td>
+        </tr>
 
-                      {/* PRICE */}
-                      <td className="px-4 py-3">
+        {/* VARIANTS */}
+        {expandedItem === product.id && (
 
-                        Rs. {product.selling_price}
+          <tr>
 
-                      </td>
+            <td
+              colSpan={6}
+              className="bg-zinc-900"
+            >
 
-                      {/* STOCK */}
-                      <td className="px-4 py-3">
+              <div className="p-4">
 
-                        <div className="flex items-center gap-3">
+                <table className="w-full text-sm">
 
-                          <span className="font-semibold min-w-[40px]">
+                  <thead>
 
-                            {product.stock}
+                    <tr className="border-b border-zinc-700 text-left">
 
-                          </span>
+                      <th className="py-2">
+                        SKU
+                      </th>
 
-                          <div className="w-24 bg-zinc-800 h-2 rounded-full overflow-hidden">
+                      <th className="py-2">
+                        Size
+                      </th>
 
-                            <div
-                              className={`
-                              h-full rounded-full
+                      <th className="py-2">
+                        Design
+                      </th>
 
-                              ${product.stock > 10 && "bg-green-500"}
-
-                              ${product.stock > 0 && product.stock <= 10 && "bg-yellow-500"}
-
-                              ${product.stock <= 0 && "bg-red-500"}
-                              `}
-                              style={{
-                                width: `${Math.min(product.stock, 100)}%`,
-                              }}
-                            ></div>
-
-                          </div>
-
-                        </div>
-
-                      </td>
-
-                      {/* STATUS */}
-                      <td className="px-4 py-3">
-
-                        <span
-                          className={`px-3 py-1 rounded-lg text-xs font-medium ${statusColor}`}
-                        >
-
-                          {status}
-
-                        </span>
-
-                      </td>
-
-                      {/* ACTIONS */}
-                      <td className="px-4 py-3">
-
-                        <div className="flex gap-2">
-
-                          <button className="px-3 py-1 rounded-lg bg-blue-500 hover:opacity-90 transition text-xs">
-
-                            View
-
-                          </button>
-
-                          <button className="px-3 py-1 rounded-lg bg-orange-500 hover:opacity-90 transition text-xs">
-
-                            Edit
-
-                          </button>
-
-
-                          <button
-                          onClick={() => {
-                            setSelectedProduct(product)
-                            setShowDeleteModal(true)
-                          }} className="px-3 py-1 rounded-lg bg-red-500 hover:opacity-90 transition text-xs">
-
-                            Delete
-
-                          </button>
-
-                        </div>
-
-                      </td>
+                      <th className="py-2">
+                        Stock
+                      </th>
 
                     </tr>
 
-                  )
+                  </thead>
 
-                })}
+                  <tbody>
 
-              </tbody>
+                    {product.variants?.map(
+                      (variant) => (
+
+                        <tr
+                          key={variant.id}
+                          className="border-b border-zinc-800"
+                        >
+
+                          <td className="py-2">
+                            {variant.sku}
+                          </td>
+
+                          <td className="py-2">
+                            {variant.size || "-"}
+                          </td>
+
+                          <td className="py-2">
+                            {variant.design || "-"}
+                          </td>
+
+                          <td className="py-2 font-medium">
+                            {variant.stock}
+                          </td>
+
+                        </tr>
+
+                      )
+                    )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        )}
+
+      </>
+    )
+
+  })}
+
+</tbody>
 
             </table>
 

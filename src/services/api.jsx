@@ -1,9 +1,9 @@
 import axios from "axios";
 
 
-const BASE_URL = "http://192.168.1.95:8000/api";
+const BASE_URL = "http://192.168.1.14:8000/api";
 
-export const BASE_MEDIA = "http://192.168.1.95:8000";
+export const BASE_MEDIA = "http://192.168.1.14:8000";
 
 export const getDashboard = async () => {
   const res = await axios.get(`${BASE_URL}/dashboard/`);
